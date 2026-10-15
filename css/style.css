@@ -346,21 +346,22 @@ code {
 [data-theme="light"] .sun-glare { opacity: 1; }
 [data-theme="light"] .starfield { opacity: 0.25; }
 
-/* A satellite drifting across the sky, its beacon blinking */
+/* A CubeSat drifting across the sky, slowly tumbling as freshly deployed ones do */
 .satellite {
   position: absolute;
   top: 14%;
   left: 0;
-  width: 40px;
-  fill: #6f86ab;
-  stroke: #a9bbd6;
-  stroke-width: 0.8;
-  opacity: 0.7;
+  width: 44px;
+  pointer-events: none;
   animation: orbit 80s linear infinite;
 }
 
-.sat-body { fill: #c9d5e6; }
-.sat-light { fill: #ff5a5a; stroke: none; animation: beacon 1.6s steps(1) infinite; }
+.satellite img {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: tumble 50s linear infinite;
+}
 
 .hero-content {
   position: relative;
@@ -980,9 +981,8 @@ code {
   to   { transform: translate(calc(100vw + 60px), -30px) rotate(-8deg); }
 }
 
-@keyframes beacon {
-  0%, 70% { opacity: 1; }
-  71%, 100% { opacity: 0.15; }
+@keyframes tumble {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
