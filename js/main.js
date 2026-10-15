@@ -76,6 +76,11 @@ function frameHero() {
 
   photo.style.backgroundSize = size + 'px ' + size + 'px';
   photo.style.backgroundPosition = left + 'px ' + top + 'px';
+  // The light-mode sky mask is cut from the photo, so it is placed exactly the same way
+  for (const layer of hero.querySelectorAll('.sky-tint, .sun')) {
+    layer.style.maskSize = layer.style.webkitMaskSize = size + 'px ' + size + 'px';
+    layer.style.maskPosition = layer.style.webkitMaskPosition = left + 'px ' + top + 'px';
+  }
 
   // The horizon's height at any x across the hero, following the photo's tilt
   function horizonAt(x) {
@@ -91,11 +96,7 @@ function frameHero() {
     earthY: top + PHOTO.earthY * size,
     earthR: PHOTO.earthR * size,
   };
-  const props = {
-    '--hl': horizonAt(0), '--hr': horizonAt(width),
-    '--ex': sky.earthX, '--ey': sky.earthY, '--er': sky.earthR,
-    '--sx': sunX, '--sy': horizonAt(sunX),
-  };
+  const props = { '--sx': sunX, '--sy': horizonAt(sunX) };
   for (const [name, value] of Object.entries(props)) hero.style.setProperty(name, value + 'px');
   return sky;
 }

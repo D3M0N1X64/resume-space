@@ -245,15 +245,8 @@ code {
 
 /* ---------- Hero ---------- */
 /* main.js sets these from the photo's framing (fallbacks shown):
-   --hl/--hr  y of the lunar horizon at the hero's left and right edges (it tilts slightly)
-   --ex/--ey  centre of Earth, --er its radius
    --sx/--sy  where the sun rises (light mode) */
 .hero {
-  --hl: 80%;
-  --hr: 78%;
-  --ex: 68%;
-  --ey: 45%;
-  --er: 140px;
   --sx: 90%;
   --sy: 78%;
   position: relative;
@@ -290,23 +283,23 @@ code {
 
 [data-theme="light"] .scene-photo { filter: brightness(1.1) contrast(1.02); }
 
-/* Light-mode sky and sun stop exactly at the (tilted) horizon line */
+/* Light-mode sky and sun only show where the photo has sky: sky-mask.png is cut from the
+   photo itself, following the hilltops and leaving a hole for Earth. main.js lines the mask
+   up with the photo; without JS both are covered and centred the same way. */
 .sky-tint,
 .sun {
   inset: 0;
-  clip-path: polygon(0 0, 100% 0, 100% calc(var(--hr) + 1px), 0 calc(var(--hl) + 1px));
+  -webkit-mask: url('../images/sky-mask.png') 50% 55% / cover no-repeat;
+  mask: url('../images/sky-mask.png') 50% 55% / cover no-repeat;
 }
 
-/* Light mode: the black sky above the horizon tints blue, with a hole left for Earth */
+/* Light mode: the black sky tints blue */
 .sky-tint {
   background: linear-gradient(180deg, #071a3d 0%, #123a78 60%, #4f86cf 100%);
   mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(circle calc(var(--er) + 2px) at var(--ex) var(--ey), transparent 97%, #000 100%);
-  mask-image: radial-gradient(circle calc(var(--er) + 2px) at var(--ex) var(--ey), transparent 97%, #000 100%);
 }
 
-/* Light mode: the sun rising at the edge of the horizon. Its wrapper is clipped at the
-   horizon line, so the bottom of the sun is hidden behind the Moon. */
+/* Light mode: the sun rising at the edge of the horizon, partly hidden behind the hills */
 .sun-glow,
 .sun-core {
   position: absolute;
@@ -329,13 +322,10 @@ code {
   box-shadow: 0 0 40px 14px rgba(255, 244, 220, 0.85);
 }
 
-/* Warm light spilling across the surface toward the viewer */
+/* Warm light spreading along the horizon from the sun */
 .sun-glare {
-  left: 0;
-  right: 0;
-  top: var(--sy);
-  bottom: 0;
-  background: radial-gradient(ellipse 55% 60% at var(--sx) 0%, rgba(255, 214, 150, 0.5), rgba(255, 214, 150, 0) 70%);
+  inset: 0;
+  background: radial-gradient(ellipse 55% 14% at var(--sx) var(--sy), rgba(255, 214, 150, 0.5), rgba(255, 214, 150, 0) 70%);
   mix-blend-mode: screen;
 }
 
