@@ -96,8 +96,12 @@ function frameHero() {
     earthY: top + PHOTO.earthY * size,
     earthR: PHOTO.earthR * size,
   };
-  const props = { '--sx': sunX, '--sy': horizonAt(sunX) };
+  const props = {
+    '--sx': sunX, '--sy': horizonAt(sunX),
+    '--ex': sky.earthX, '--ey': sky.earthY, '--er': sky.earthR,
+  };
   for (const [name, value] of Object.entries(props)) hero.style.setProperty(name, value + 'px');
+  hero.classList.add('framed');
   return sky;
 }
 

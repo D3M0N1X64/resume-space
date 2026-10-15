@@ -245,7 +245,8 @@ code {
 
 /* ---------- Hero ---------- */
 /* main.js sets these from the photo's framing (fallbacks shown):
-   --sx/--sy  where the sun rises (light mode) */
+   --sx/--sy  where the sun rises (light mode)
+   --ex/--ey  centre of Earth, --er its radius (no fallback: the full Earth needs JS) */
 .hero {
   --sx: 90%;
   --sy: 78%;
@@ -298,6 +299,24 @@ code {
   background: linear-gradient(180deg, #071a3d 0%, #123a78 60%, #4f86cf 100%);
   mix-blend-mode: screen;
 }
+
+/* Light mode: a fully lit Earth covers the half-lit one, so its night side doesn't show as a
+   black half-disc against the blue sky. main.js places it exactly over Earth (--ex/--ey/--er)
+   and adds .framed once it has; without JS it stays hidden. */
+.earth-full {
+  position: absolute;
+  left: calc(var(--ex) - var(--er));
+  top: calc(var(--ey) - var(--er));
+  width: calc(var(--er) * 2);
+  height: calc(var(--er) * 2);
+  background: url('../images/earth-full.webp') center / 100% 100% no-repeat;
+  transform: scale(1.01);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+
+[data-theme="light"] .hero.framed .earth-full { opacity: 1; }
 
 /* Light mode: the sun rising at the edge of the horizon, partly hidden behind the hills */
 .sun-glow,
@@ -1132,6 +1151,7 @@ code {
   .sky-tint,
   .sun,
   .sun-glare,
+  .earth-full,
   .satellite,
   .photo-credit,
   .telemetry-wrap,
