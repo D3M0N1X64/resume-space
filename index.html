@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ashton Lee · Network Administrator &amp; IT Specialist</title>
+  <meta name="description" content="Résumé of Ashton Lee: network administrator, IT specialist and programmer, finishing a BS in Information Technology at Capella University.">
+
+  <!-- Set the saved theme before the page paints, so it doesn't flash.
+       The "js" class lets the CSS know scripts are running (used for scroll fade-ins). -->
+  <script>
+    (function () {
+      document.documentElement.classList.add('js');
+      var saved = null;
+      try { saved = localStorage.getItem('space-theme'); } catch (e) { /* storage blocked: use the system preference */ }
+      // Dark is the default; light only if the visitor chose it before
+      document.documentElement.setAttribute('data-theme', saved || 'dark');
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========== NAVIGATION ========== -->
+  <header class="site-header">
+    <nav class="nav">
+      <a href="#home" class="nav-logo">
+        <span class="monogram" aria-hidden="true">AL</span>
+        Ashton Lee
+      </a>
+
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#accolades">Accolades</a></li>
+        <li><a href="#terminal">Terminal</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <button class="theme-toggle" aria-label="Toggle light and dark theme" title="Light / dark">
+        <!-- Sun (shown in dark mode) and moon (shown in light mode) -->
+        <svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+        <svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ========== HOME ========== -->
+    <section id="home" class="hero">
+      <!-- The scene, back to front: a real NASA photo (Apollo 11, AS11-44-6552) of Earth rising
+           over the lunar horizon, stars in the black sky (drawn by main.js), then the light-mode
+           sunrise layers. main.js frames the photo so Earth sits right of the text on any screen,
+           and shares Earth's and the horizon's positions with the CSS as custom properties. -->
+      <div class="scene-photo" role="img" aria-label="Earth rising over the Moon's horizon, photographed by Apollo 11 (NASA)"></div>
+      <canvas class="starfield" aria-hidden="true"></canvas>
+      <div class="sky-tint" aria-hidden="true"></div>
+      <div class="sun" aria-hidden="true">
+        <div class="sun-glow"></div>
+        <div class="sun-core"></div>
+      </div>
+      <div class="sun-glare" aria-hidden="true"></div>
+      <svg class="satellite" viewBox="0 0 40 20" aria-hidden="true" focusable="false">
+        <rect x="0" y="6" width="13" height="8" rx="1"/>
+        <rect x="27" y="6" width="13" height="8" rx="1"/>
+        <rect x="15" y="5" width="10" height="10" rx="2" class="sat-body"/>
+        <path d="M13 10h2M25 10h2"/>
+        <circle cx="20" cy="3" r="1.4" class="sat-light"/>
+      </svg>
+
+      <div class="hero-content">
+        <div class="hero-text reveal">
+          <p class="kicker">// Mission profile</p>
+          <h1>Ashton Lee</h1>
+          <p class="hero-role">Network Administrator &middot; IT Specialist &middot; Programmer</p>
+          <p class="tagline">I keep networks, and the people who rely on them, connected at Alabama Goodwill Industries. I also write code, solve problems and plan projects.</p>
+          <p class="print-only">ashton.redsky@gmail.com</p>
+          <div class="hero-actions">
+            <a href="#experience" class="btn">View Experience</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry status bar along the bottom, over the lunar surface -->
+      <div class="telemetry-wrap">
+        <aside class="telemetry reveal" aria-label="At a glance">
+          <div class="telemetry-status">
+            <span class="telemetry-label">Status</span>
+            <span class="status-ok"><span class="pulse" aria-hidden="true"></span>Online</span>
+          </div>
+          <dl>
+            <div><dt>Role</dt><dd>Network Administrator</dd></div>
+            <div><dt>Station</dt><dd>Alabama Goodwill Industries</dd></div>
+            <div><dt>Uptime</dt><dd>8+ years in IT</dd></div>
+            <div><dt>Training</dt><dd>BS in IT &middot; Senior</dd></div>
+            <div><dt>Location</dt><dd>Alabama</dd></div>
+          </dl>
+          <div class="telemetry-clock">
+            <span class="telemetry-label">UTC</span>
+            <span id="utc-clock">--:--:--</span>
+          </div>
+        </aside>
+      </div>
+
+      <p class="photo-credit">Photo: NASA, Apollo 11</p>
+    </section>
+
+    <!-- ========== ABOUT ========== -->
+    <section id="about" class="section">
+      <p class="section-kicker reveal">01 / About</p>
+      <h2 class="section-title reveal">About Me</h2>
+
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <p class="lead">
+            As network administrator at Alabama Goodwill Industries, I keep the network and the
+            people who depend on it connected and running. I came up through hands-on support:
+            five years as a remote Mac+ technician for Apple, three years as an enrollment counselor at
+            Capella University (with stretch roles in operations and IT), and field and desktop work
+            along the way.
+          </p>
+          <p>
+            I enjoy problems that need both halves of the brain: tracking down why a network is
+            misbehaving, designing a database that stays tidy, writing code that saves someone an
+            afternoon, or planning a project so it lands on time. I'm now a senior in Capella
+            University's ABET-accredited Information Technology program.
+          </p>
+          <p>
+            Away from the rack, you'll find me on a motorcycle, playing guitar or deep in a game.
+          </p>
+        </div>
+
+        <aside class="panel facts reveal">
+          <h3 class="panel-title">At a Glance</h3>
+          <dl>
+            <div><dt>Current Role</dt><dd>Network Administrator, Alabama Goodwill Industries</dd></div>
+            <div><dt>Experience</dt><dd>8+ years in IT and support</dd></div>
+            <div><dt>Studying</dt><dd>BS in Information Technology, Capella University (Senior)</dd></div>
+            <div><dt>Based In</dt><dd>Alabama</dd></div>
+            <div><dt>Off the Clock</dt><dd>Motorcycles, guitars &amp; games</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========== SKILLS ========== -->
+    <section id="skills" class="section section-alt">
+      <p class="section-kicker reveal">02 / Skills</p>
+      <h2 class="section-title reveal">Skills</h2>
+
+      <!-- Set each bar with data-level (0–100) and keep aria-valuenow and the label in step -->
+      <div class="skill-grid">
+        <article class="panel skill-card reveal">
+          <h3>Networking &amp; IT</h3>
+          <p>Keeping networks, systems and the people using them healthy, from the rack to the help desk.</p>
+          <div class="meter" data-level="90" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="Expert">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Expert</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <h3>Problem Solving</h3>
+          <p>Methodical troubleshooting: reproduce it, isolate it, fix it, then write down what happened.</p>
+          <div class="meter" data-level="90" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="Expert">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Expert</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <h3>Programming</h3>
+          <p>Writing clear, working code to automate the boring parts and build useful tools.</p>
+          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Advanced</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <h3>Software Development</h3>
+          <p>Taking an idea from requirements through design, build, testing and release.</p>
+          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Advanced</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <h3>Databases</h3>
+          <p>Designing, querying and maintaining relational data that stays consistent and fast.</p>
+          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Advanced</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <h3>Project Planning</h3>
+          <p>Scoping the work, setting milestones and keeping everyone informed until it ships.</p>
+          <div class="meter" data-level="80" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-valuetext="Advanced">
+            <div class="meter-fill"></div>
+          </div>
+          <span class="meter-label">Advanced</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== EXPERIENCE ========== -->
+    <section id="experience" class="section">
+      <p class="section-kicker reveal">03 / Experience</p>
+      <h2 class="section-title reveal">Experience</h2>
+
+      <!-- Newest first. Add exact dates to each .mission-when when you have them, e.g. "Jan 2023 – Present". -->
+      <ol class="timeline">
+        <li class="mission is-current reveal">
+          <p class="mission-when">Current role</p> <!-- DATES: add your start month/year -->
+          <div class="panel mission-card">
+            <h3>Network Administrator</h3>
+            <p class="mission-org">Alabama Goodwill Industries</p>
+            <ul class="mission-points">
+              <li>Administer and maintain the organization's network infrastructure, including switches, routers, firewalls and wireless, keeping locations and staff connected.</li>
+              <li>Monitor network health and performance, and diagnose outages and connectivity problems across sites.</li>
+              <li>Manage user accounts, access and security practices to protect the organization's systems and data.</li>
+              <li>Plan and carry out network and IT improvements, coordinating with staff to keep downtime to a minimum.</li>
+              <li>Document configurations and procedures so fixes are repeatable and knowledge is shared.</li>
+            </ul>
+            <ul class="tags" aria-label="Skills used">
+              <li>Networking</li><li>IT Infrastructure</li><li>Network Security</li><li>Troubleshooting</li><li>Project Planning</li><li>Documentation</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="mission reveal">
+          <p class="mission-when">3 years</p> <!-- DATES -->
+          <div class="panel mission-card">
+            <h3>Enrollment Counselor</h3>
+            <p class="mission-org">Capella University</p>
+            <ul class="mission-points">
+              <li>Guided prospective students through the enrollment process, from first inquiry to registration, in a fast-paced, goal-driven environment.</li>
+              <li>Explained programs, admission requirements and next steps clearly to people from a wide range of backgrounds.</li>
+              <li>Kept student records accurate in enrollment systems while following privacy and compliance requirements.</li>
+              <li>Managed a high volume of calls, emails and follow-ups through careful organization and time management.</li>
+              <li>Took on stretch roles with the operations and IT teams alongside core counseling duties, helping improve processes and resolve technical issues.</li>
+            </ul>
+            <ul class="tags" aria-label="Skills used">
+              <li>Communication</li><li>Customer Service</li><li>Operations</li><li>IT Support</li><li>Data Accuracy</li><li>Time Management</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="mission reveal">
+          <p class="mission-when">5 years &middot; Remote</p> <!-- DATES -->
+          <div class="panel mission-card">
+            <h3>Mac+ Technician</h3>
+            <p class="mission-org">Apple Inc.</p>
+            <ul class="mission-points">
+              <li>Provided remote technical support to Mac customers, diagnosing hardware, software and macOS issues.</li>
+              <li>Troubleshot problems step by step with customers of every skill level, explaining technical issues in plain language.</li>
+              <li>Resolved issues with networking and connectivity, Apple accounts, backups and system performance.</li>
+              <li>Documented cases accurately and escalated complex issues to senior support when needed.</li>
+              <li>Handled a steady volume of cases while maintaining high customer satisfaction.</li>
+            </ul>
+            <ul class="tags" aria-label="Skills used">
+              <li>macOS</li><li>Hardware Diagnostics</li><li>Remote Support</li><li>Customer Service</li><li>Documentation</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="mission reveal">
+          <p class="mission-when">Additional experience</p> <!-- DATES -->
+          <div class="panel mission-card">
+            <h3>Field &amp; Desktop Support</h3>
+            <ul class="mission-points">
+              <li><strong>Desktop Technician</strong>, University of Alabama in Huntsville (UAH): set up and maintained campus workstations, repaired hardware, and supported faculty, staff and students with software and connectivity issues.</li>
+              <li><strong>Contract Technician</strong>, DISH Network: installed, configured and serviced customer equipment on site, troubleshooting signal and connectivity problems and explaining the setup to customers.</li>
+            </ul>
+            <ul class="tags" aria-label="Skills used">
+              <li>Desktop Support</li><li>Hardware Repair</li><li>Installation</li><li>Field Service</li><li>Customer Service</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ========== EDUCATION ========== -->
+    <section id="education" class="section section-alt">
+      <p class="section-kicker reveal">04 / Education</p>
+      <h2 class="section-title reveal">Education</h2>
+
+      <div class="edu-grid">
+        <article class="panel edu-card reveal">
+          <p class="card-label">In progress &middot; Senior</p>
+          <h3>BS in Information Technology</h3>
+          <p class="mission-org">Capella University</p>
+          <p>ABET-accredited Bachelor of Science program.</p>
+        </article>
+
+        <article class="panel edu-card reveal">
+          <p class="card-label">3 years of study</p>
+          <h3>Computer Science coursework</h3>
+          <p class="mission-org">Auburn University</p>
+          <p>Three years in the Computer Science degree path before moving to Information Technology.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== ACCOLADES ========== -->
+    <section id="accolades" class="section">
+      <p class="section-kicker reveal">05 / Accolades</p>
+      <h2 class="section-title reveal">Accolades</h2>
+
+      <div class="accolade-grid">
+        <article class="panel accolade-card reveal">
+          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="9" r="5.5"/><path d="M8.8 13.5 7 21.5l5-2.6 5 2.6-1.8-8"/><path d="m12 6.5.8 1.7 1.8.2-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.2z"/>
+          </svg>
+          <h3>Eagle Scout</h3>
+          <p>Earned Scouting's highest rank through leadership, service and a community project.</p>
+        </article>
+
+        <article class="panel accolade-card reveal">
+          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 7 18.5z"/><path d="M10 13.5h4M12 11.5v4"/>
+          </svg>
+          <h3>AI &amp; Cloud Conferences</h3>
+          <p>Attended GAINS and other conferences to deepen my knowledge of AI and cloud development.</p>
+        </article>
+
+        <article class="panel accolade-card reveal">
+          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 4.5V8M9 12.5h.01M15 12.5h.01M9.5 16h5M3 12v3M21 12v3"/><circle cx="12" cy="3.5" r="1"/>
+          </svg>
+          <h3>Robotics Competitions</h3>
+          <p>Competed on robotics teams, collaborating to design, build and program under deadline.</p>
+        </article>
+
+        <article class="panel accolade-card reveal">
+          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m10 6.5 3.5-3.5 3.5 3.5-3.5 3.5zM7 9.5l3.5 3.5L7 16.5 3.5 13z"/><path d="m10.5 10 3 3M13.5 10l-3 3"/><path d="M15 15.5a3.5 3.5 0 0 0 3.5-3.5M15 19a7 7 0 0 0 7-7"/>
+          </svg>
+          <h3>Auburn Small Satellite Program</h3>
+          <p>Worked with Auburn University's student CubeSat program, which designs and builds small satellites.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== TERMINAL ========== -->
+    <section id="terminal" class="section section-alt">
+      <p class="section-kicker reveal">06 / Terminal</p>
+      <h2 class="section-title reveal">Terminal</h2>
+      <p class="section-intro reveal">Prefer the command line? Type <code>help</code> to see what's available.</p>
+
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <span class="terminal-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="terminal-title">guest@mission-control: ~</span>
+        </div>
+        <div class="terminal-output" id="terminal-output" aria-live="polite">
+          <p class="t-info">Connection established. Welcome aboard.</p>
+          <p class="t-hint">Type <strong>help</strong> for a list of commands.</p>
+        </div>
+        <form class="terminal-input-row" id="terminal-form" autocomplete="off">
+          <label for="terminal-input" class="t-prompt">$</label>
+          <input type="text" id="terminal-input" class="terminal-input" spellcheck="false" aria-label="Terminal command">
+        </form>
+      </div>
+    </section>
+
+    <!-- ========== CONTACT ========== -->
+    <section id="contact" class="section">
+      <p class="section-kicker reveal">07 / Contact</p>
+      <h2 class="section-title reveal">Contact</h2>
+
+      <div class="panel contact-card reveal">
+        <p class="card-label">Open channel</p>
+        <p class="contact-lead">The best way to reach me is by email. I read every message.</p>
+        <a class="contact-email" href="mailto:ashton.redsky@gmail.com">ashton.redsky@gmail.com</a>
+        <div class="contact-actions">
+          <a class="btn" href="mailto:ashton.redsky@gmail.com?subject=Hello%20Ashton">Send an Email</a>
+          <button type="button" class="btn btn-ghost" id="copy-email" data-email="ashton.redsky@gmail.com">Copy Address</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span id="year"></span> Ashton Lee</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
