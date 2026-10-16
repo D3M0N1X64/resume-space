@@ -581,9 +581,20 @@ code {
 }
 
 .skill-card {
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   transition: border-color 0.2s, transform 0.2s;
 }
+
+/* The tools sit along the bottom of each card, so they line up across a row */
+.skill-card .tags {
+  margin-top: auto;
+  padding-top: 1.1rem;
+  gap: 0.35rem;
+}
+
+.skill-card .tags li { font-size: 0.68rem; }
 
 .skill-card:hover {
   border-color: var(--accent);
