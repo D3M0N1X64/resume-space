@@ -763,10 +763,22 @@ code {
 }
 
 /* ---------- Accolades ---------- */
+/* Three patches across; a shorter last row sits centred under the row above */
 .accolade-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.25rem;
+}
+
+.accolade-grid > * { flex: 0 1 calc((100% - 2.5rem) / 3); }
+
+@media (max-width: 900px) {
+  .accolade-grid > * { flex-basis: calc((100% - 1.25rem) / 2); }
+}
+
+@media (max-width: 560px) {
+  .accolade-grid > * { flex-basis: 100%; }
 }
 
 .accolade-card {
@@ -2367,7 +2379,7 @@ html.gaming body {
 
   .skill-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem 1rem; }
   .skill-card p { margin-bottom: 0.2rem; }
-  .accolade-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem 1rem; }
+  .accolade-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem 1rem; }
   .timeline { padding-left: 0; }
   .timeline::before, .mission::before { display: none; }
   .mission { margin-bottom: 0.6rem; }
