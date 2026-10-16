@@ -18,10 +18,12 @@
       // Dark is the default; light only if the visitor chose it before
       root.setAttribute('data-theme', saved || 'dark');
 
+      // The access screen plays on every visit; it's skipped on reloads in the same tab, for links
+      // to a section (#experience) and for "?skip". "?boot" always plays it (mobile.html uses this)
       var granted = false;
-      try { granted = sessionStorage.getItem('space-access') === 'granted'; } catch (e) { /* storage blocked: show the access screen */ }
-      // "?boot" always plays it (the phone preview, mobile.html, uses this)
-      if (!granted || /[?&]boot\b/.test(location.search)) root.classList.add('booting');
+      try { granted = sessionStorage.getItem('space-access') === 'granted'; } catch (e) { /* storage blocked */ }
+      var linked = (location.hash.length > 1 && location.hash !== '#home') || /[?&]skip\b/.test(location.search);
+      if (/[?&]boot\b/.test(location.search) || (!granted && !linked)) root.classList.add('booting');
     })();
   </script>
 
@@ -44,7 +46,7 @@
     <div class="crt" id="boot-crt" role="dialog" aria-modal="true" aria-labelledby="boot-title">
       <div class="crt-content">
         <div class="crt-header">
-          <span id="boot-title">CREW ACCESS</span>
+          <span id="boot-title"><span class="crt-title-extra">CREW RECORD · </span>ASHTON LEE<span class="crt-title-extra"> · NETWORK ADMINISTRATOR</span></span>
           <span id="boot-met">MET 000/00:00:00</span>
         </div>
         <!-- A slowly turning globe drawn in characters (main.js) -->
@@ -236,11 +238,10 @@
             <span class="status-ok"><span class="pulse" aria-hidden="true"></span>Online</span>
           </div>
           <dl>
-            <div><dt>Role</dt><dd>Network Administrator</dd></div>
             <div><dt>Station</dt><dd>Alabama Goodwill Industries</dd></div>
             <div><dt>Uptime</dt><dd>8+ years in IT</dd></div>
-            <div><dt>Training</dt><dd>BS in IT&nbsp;&middot; Senior</dd></div>
-            <div><dt>Location</dt><dd>Alabama</dd></div>
+            <div><dt>Training</dt><dd>BSIT &middot; Senior</dd></div>
+            <div><dt>Location</dt><dd>Huntsville, AL</dd></div>
           </dl>
           <div class="telemetry-clock">
             <span class="telemetry-label">UTC</span>
@@ -283,7 +284,7 @@
             <div><dt>Current Role</dt><dd>Network Administrator, Alabama Goodwill Industries</dd></div>
             <div><dt>Experience</dt><dd>8+ years in IT and support</dd></div>
             <div><dt>Studying</dt><dd>BS in Information Technology, Capella University (Senior)</dd></div>
-            <div><dt>Based In</dt><dd>Alabama</dd></div>
+            <div><dt>Based In</dt><dd>Huntsville, Alabama</dd></div>
             <div><dt>Off the Clock</dt><dd>Motorcycles, guitars &amp; games</dd></div>
           </dl>
         </aside>
@@ -512,7 +513,7 @@
             <g class="patch-icon" transform="translate(42 42) scale(1.5)"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 7 18.5z"/><path d="M10 13.5h4M12 11.5v4"/></g>
           </svg>
           <h3>AI &amp; Cloud Conferences</h3>
-          <p>Attended GAINS and other conferences to deepen my knowledge of AI and cloud development.</p>
+          <p>Took part in the AI Forge sessions at GAINS 2026 with Microsoft, Anthropic, OpenAI and Goodwill Keystone, alongside other AI and cloud conferences.</p>
         </article>
 
         <article class="panel accolade-card reveal">
@@ -574,7 +575,7 @@
 
       <div class="panel contact-card reveal">
         <p class="card-label">Open channel</p>
-        <p class="contact-lead">The best way to reach me is by email. I read every message.</p>
+        <p class="contact-lead">The best way to reach me is by email.</p>
         <a class="contact-email" href="mailto:ashton.redsky@gmail.com">ashton.redsky@gmail.com</a>
         <div class="contact-actions">
           <a class="btn" href="mailto:ashton.redsky@gmail.com?subject=Hello%20Ashton">Send an Email</a>

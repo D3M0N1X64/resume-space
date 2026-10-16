@@ -82,7 +82,7 @@ function nextToast() {
   if (!toast || !toastCurrent) return;
   toast.textContent = toastCurrent.text;
   toast.classList.add('show');
-  toastTimer = setTimeout(hideToast, toastCurrent.kind === 'setting' ? 1600 : 2600);
+  toastTimer = setTimeout(hideToast, { setting: 1600, hint: 6000 }[toastCurrent.kind] || 2600);
 }
 
 function hideToast() {
@@ -168,7 +168,7 @@ function hiddenCommands({ print, append }) {
     traceroute: tracert,
     nslookup,
     dig: nslookup,
-    // A small globe that spins round to Ashton's home, Alabama
+    // A small globe that spins round to Ashton's home, Huntsville, Alabama
     globe: () => {
       achievements.unlock('globe');
       print('Locating home base...');

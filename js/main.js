@@ -4,6 +4,7 @@
    ========================================================== */
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const touchScreen = window.matchMedia('(pointer: coarse)').matches;
 
 // ---------- Light / dark theme ----------
 // The initial theme is set by a small script in <head> so the page doesn't flash.
@@ -454,10 +455,10 @@ function initFrame(boot) {
 // A small Earth drawn in characters: continents from fractal noise sampled on a sphere (so
 // they wrap around seamlessly), polar ice, sunlight from the upper left and a dark night
 // side with scattered city lights. It turns west to east while the access screen is up, and
-// spinHome() whirls it round to Alabama with a blinking marker. options.rows sets its size.
+// spinHome() whirls it round to Huntsville, Alabama with a blinking marker. options.rows sets its size.
 function createAsciiPlanet(pre, caption, options = {}) {
   const TAU = Math.PI * 2;
-  const HOME = { lat: 32.8, lon: -86.8 };   // Alabama
+  const HOME = { lat: 34.7, lon: -86.6 };   // Huntsville, Alabama
   const MAP_W = 96;
   const MAP_H = 48;
   const SEA = '..,,-~';         // dim to bright; light strokes so land stands out
@@ -592,7 +593,7 @@ function createAsciiPlanet(pre, caption, options = {}) {
     }
     pre.textContent = out;
     if (atHome) {
-      caption.textContent = 'HOME · ALABAMA · 32.8°N 086.8°W';
+      caption.textContent = 'HOME · HUNTSVILLE, AL · 34.7°N 086.6°W';
       return;
     }
     // The longitude facing the viewer, written the usual way for Earth: 0–180° east or west
@@ -649,7 +650,7 @@ function createAsciiPlanet(pre, caption, options = {}) {
         draw();
       }
     },
-    // Whirl round (a couple of turns, slowing down) until Alabama faces the viewer, then mark it
+    // Whirl round (a couple of turns, slowing down) until Huntsville faces the viewer, then mark it
     spinHome(onDone) {
       const target = ((((-HOME.lon * Math.PI) / 180) % TAU) + TAU) % TAU;
       atHome = false;
@@ -743,7 +744,7 @@ function initBoot() {
         return;
       }
       p.textContent += text[i];
-      await wait(30 + Math.random() * 45);
+      await wait(18 + Math.random() * 24);
     }
   }
 
@@ -776,6 +777,8 @@ function initBoot() {
     run++;
     mode = 'typing';
     fast = reducedMotion;
+    interacted = false;
+    stopCountdown();
     output.innerHTML = '';
     form.hidden = true;
     frame.classList.remove('awaiting');
@@ -804,8 +807,8 @@ function initBoot() {
       if (thisRun !== run || mode === 'done') return;
       const filled = Math.round((percent / 100) * CELLS);
       bar.textContent = '[' + '█'.repeat(filled) + '░'.repeat(CELLS - filled) + '] ' + String(percent).padStart(3) + '%';
-      await wait(Math.random() < 0.15 ? 220 : 40 + Math.random() * 50);
-      percent = fast ? 100 : Math.min(100, percent + 2 + Math.floor(Math.random() * 7));
+      await wait(Math.random() < 0.1 ? 150 : 25 + Math.random() * 30);
+      percent = fast ? 100 : Math.min(100, percent + 4 + Math.floor(Math.random() * 9));
     }
     bar.textContent = '[' + '█'.repeat(CELLS) + '] 100%';
   }
@@ -815,13 +818,14 @@ function initBoot() {
     flicker();          // the tube flickers as it powers on...
     await wait(1100);   // ...and settles before the text starts
     if (!current()) return;
+    showToast(touchScreen ? 'TAP BYPASS TO SKIP · TAP SCREEN TO SPEED UP' : 'PRESS ESC OR BYPASS TO SKIP · ANY KEY TO SPEED UP', 'hint');
     line('MEDS MFD 3 · BOOT ROM 4.07');
     line('LOADING FLIGHT SOFTWARE');
     await loadingBar(thisRun);
     if (!current()) return;
     line('FLIGHT SOFTWARE LOADED', 'b-dim');
     line();
-    await wait(300);
+    await wait(150);
     const checks = [
       ['GPC 1 SELF-TEST', 'PASS'],
       ['DATA BUS 1-4', 'NOMINAL'],
@@ -831,14 +835,14 @@ function initBoot() {
     for (const [label, value] of checks) {
       if (!current()) return;
       line(status(label, value));
-      await wait(260);
+      await wait(150);
     }
     if (!current()) return;
     line();
     const command = line(SHELL);
-    await wait(400);
+    await wait(250);
     await type(command, COMMAND, thisRun);
-    await wait(350);
+    await wait(200);
     if (current()) askToConfirm();
   }
 
@@ -859,7 +863,41 @@ function initBoot() {
     line('Confirm');
     line('Are you sure you want to perform this action?');
     line('Performing the operation "Open-CrewRecord" on target "LEE, ASHTON (Network Administrator)".');
+    if (!interacted) startCountdown();
     showPrompt(CONFIRM, 'confirm');
+  }
+
+  // At the first prompt, carry on with the default (Yes) after a few seconds unless the visitor
+  // starts using the console; any key, click or tap there cancels it
+  let interacted = false;
+  let countdown = null;
+  function startCountdown() {
+    let left = 10;
+    const note = line('', 'b-dim');
+    const show = () => { note.textContent = 'Proceeding with default [Y] in ' + left + '...'; };
+    show();
+    countdown = { note, timer: setInterval(() => {
+      left--;
+      if (left > 0) {
+        show();
+        return;
+      }
+      stopCountdown();
+      submit('');
+    }, 1000) };
+  }
+
+  function stopCountdown(cancelled) {
+    if (!countdown) return;
+    clearInterval(countdown.timer);
+    if (cancelled) countdown.note.textContent = 'Auto-proceed cancelled. Type help to see commands.';
+    else countdown.note.remove();
+    countdown = null;
+  }
+
+  function onInteract() {
+    interacted = true;
+    if (countdown && waitingForInput()) stopCountdown(true);
   }
 
   // Runs one of the shared commands; returns false if there's no such command
@@ -918,9 +956,15 @@ function initBoot() {
     showPrompt(SHELL, 'shell');
   }
 
+  // Remember that this visitor got in, for reloads in this tab only
+  function rememberAccess() {
+    try { sessionStorage.setItem('space-access', 'granted'); } catch (e) { /* storage blocked: ask again */ }
+  }
+
   async function grant() {
     mode = 'done';
-    try { sessionStorage.setItem('space-access', 'granted'); } catch (e) { /* storage blocked: ask again next visit */ }
+    stopCountdown();
+    rememberAccess();
     line();
     for (const label of ['VERIFYING CREDENTIALS', 'DECRYPTING RECORD']) {
       await wait(400);
@@ -936,7 +980,8 @@ function initBoot() {
   function bypass() {
     if (mode === 'done') return;
     mode = 'done';
-    try { sessionStorage.setItem('space-access', 'granted'); } catch (e) { /* storage blocked: ask again next visit */ }
+    stopCountdown();
+    rememberAccess();
     form.hidden = true;
     frame.classList.remove('awaiting');
     banner('ACCESS BYPASSED');
@@ -1006,13 +1051,23 @@ function initBoot() {
   // Clicking the display skips ahead, or puts the cursor back in the prompt
   frame.addEventListener('click', () => {
     if (!root.classList.contains('booting') || gaming()) return;
-    if (waitingForInput()) input.focus({ preventScroll: true });
-    else fast = true;
+    if (waitingForInput()) {
+      onInteract();
+      input.focus({ preventScroll: true });
+    } else {
+      fast = true;
+    }
   });
 
   // Any key skips ahead; once a prompt is up, typing goes to it even if it lost focus
+  // Esc goes straight in
   document.addEventListener('keydown', (event) => {
     if (!root.classList.contains('booting')) return;
+    if (event.key === 'Escape') {
+      bypass();
+      return;
+    }
+    if (waitingForInput()) onInteract();
     if (!waitingForInput()) fast = true;
     else if (document.activeElement !== input && !event.target.closest('button')) input.focus({ preventScroll: true });
   });

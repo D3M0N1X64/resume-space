@@ -383,7 +383,7 @@ code {
   flex-direction: column;
   justify-content: center;
   gap: 0.3rem;
-  padding: 0.9rem 1.2rem;
+  padding: 0.75rem 1.2rem;
   white-space: nowrap;
 }
 
@@ -403,11 +403,22 @@ code {
 .telemetry dl {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(2, auto);
   justify-content: space-between;
-  gap: 0.5rem 1.5rem;
+  align-content: center;
+  gap: 0.6rem 1.4rem;
   margin: 0;
-  padding: 0.9rem 1.2rem;
+  padding: 0.75rem 1.2rem;
+}
+
+/* Each reading stays on one line, so values never break mid-phrase */
+.telemetry dd { white-space: nowrap; }
+
+/* The readings sit in one row when the bar is wide enough, otherwise two even columns */
+.telemetry-wrap { container-type: inline-size; }
+
+@container (min-width: 880px) {
+  .telemetry dl { grid-template-columns: repeat(4, auto); }
 }
 
 .telemetry dl div {
@@ -1526,6 +1537,13 @@ html.booting .mfd.entering .crt {
   .crt-log { padding-right: 250px; }
 }
 
+.crt-header span { white-space: nowrap; }
+
+/* On narrow screens the boot screen's header is just the name, to leave room for the clock */
+@media (max-width: 760px) {
+  .crt-title-extra { display: none; }
+}
+
 .crt-log {
   flex: 1;
   overflow-y: auto;
@@ -2245,6 +2263,8 @@ html.gaming body {
     grid-template-columns: repeat(2, 1fr);
     border-top: 1px solid rgba(120, 170, 255, 0.16);
   }
+
+  .telemetry dd { white-space: normal; }
 }
 
 @media (max-width: 480px) {
