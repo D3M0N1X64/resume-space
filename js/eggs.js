@@ -7,6 +7,7 @@
 // ---------- Achievements ----------
 // Each easter egg unlocks one. Found ones are remembered in this browser (localStorage).
 const ACHIEVEMENTS = [
+  { id: 'daylight', name: 'Here comes the sun', hint: 'Switch the display to DAY and watch the horizon.' },
   { id: 'ping', name: 'Echo reply', hint: 'A network admin\'s first troubleshooting command.' },
   { id: 'tracert', name: 'Hop by hop', hint: 'Trace the route to someone\'s inbox.' },
   { id: 'nslookup', name: 'Name resolved', hint: 'Ask DNS who Ashton is.' },
@@ -219,6 +220,16 @@ function initEasterEggs() {
       return achievements.report();
     },
   };
+
+  // ----- Day / night: the sun rises over the Moon and Earth comes fully lit -----
+  document.addEventListener('themechange', (event) => {
+    if (event.detail === 'light') {
+      showToast('DAY · SUNRISE OVER THE LUNAR HORIZON', 'setting');
+      achievements.unlock('daylight');
+    } else {
+      showToast('NGT · EARTHRISE OVER THE MOON', 'setting');
+    }
+  });
 
   // ----- Konami code: amber phosphor ("night ops") -----
   const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];

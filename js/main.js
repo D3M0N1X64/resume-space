@@ -12,6 +12,7 @@ function toggleTheme() {
   const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   root.setAttribute('data-theme', next);
   try { localStorage.setItem('space-theme', next); } catch (e) { /* storage blocked: theme just won't be remembered */ }
+  document.dispatchEvent(new CustomEvent('themechange', { detail: next }));   // eggs.js listens
   return next;
 }
 
