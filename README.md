@@ -4,6 +4,8 @@
 
 A mission-control themed résumé for Ashton Lee, network administrator at Alabama Goodwill Industries. It covers my experience, skills, education and accolades, with a way to get in touch.
 
+This site, and the commits co-authored by Claude, were built while attending the AI Forge sessions at the GAINS conference, with Microsoft, Anthropic, OpenAI and Goodwill Keystone.
+
 ## Features
 
 - Hero scene built from NASA public-domain photography: Apollo 11's Earthrise with Hubble drifting overhead
