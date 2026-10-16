@@ -216,9 +216,10 @@ function initScrollReveal() {
 // ---------- Terminal commands ----------
 // Shared by the site's terminal and the access screen, so both answer the same way.
 // print(text, type) adds a line, append(node) adds an element, clear() empties the screen;
-// extraHelp adds lines to "help", and onContact runs after "contact". Each command gets the
-// words typed after it. The hidden easter-egg commands come from eggs.js.
-function terminalCommands({ print, append, clear, extraHelp = '', onContact }) {
+// extraHelp adds lines to "help", onContact runs after "contact" and onGameExit after the
+// arcade game closes. Each command gets the words typed after it. The hidden easter-egg
+// commands come from eggs.js, the arcade game from arcade.js.
+function terminalCommands({ print, append, clear, extraHelp = '', onContact, onGameExit }) {
   // Read names straight from the page so the terminal stays in sync with the content
   function listFromPage(selector) {
     return Array.from(document.querySelectorAll(selector))
@@ -238,6 +239,8 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact }) {
       '  accolades   list awards and honors\n' +
       '  contact     show my email\n' +
       '  mobile      preview the site on phone screens\n' +
+      '  play        play the arcade game, LUNAR DEFENSE\n' +
+      '  scores      arcade high scores\n' +
       '  theme       switch light and dark mode\n' +
       '  achievements  easter eggs you\'ve found\n' +
       '  clear       clear the terminal'
@@ -264,12 +267,18 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact }) {
       if (tab) print('Opening the phone preview in a new tab.', 't-ok');
       else print('Pop-up blocked. Open mobile.html on this site to see the preview.', 't-error');
     },
+    play: () => {
+      if (startArcade({ onExit: onGameExit })) print('Launching LUNAR DEFENSE. Esc exits.', 't-ok');
+    },
+    scores: () => print(arcadeScoresText()),
     theme: () => {
       const theme = toggleTheme();
       print('Switched to ' + theme + ' mode.', 't-ok');
     },
     clear,
   };
+  commands.arcade = commands.play;
+  commands.galaga = commands.play;
   return Object.assign(hiddenCommands({ print, append }), commands);
 }
 
@@ -320,6 +329,7 @@ function initTerminal() {
     },
     clear: () => { output.innerHTML = ''; },
     onContact: () => setTimeout(() => document.getElementById('contact').scrollIntoView(), 700),
+    onGameExit: () => input.focus({ preventScroll: true }),
   });
 
   form.addEventListener('submit', (event) => {
@@ -753,7 +763,11 @@ function initBoot() {
     },
     clear: () => { output.innerHTML = ''; },
     extraHelp: '  open        open the crew record (enter the site)\n',
+    onGameExit: () => {
+      if (waitingForInput()) input.focus({ preventScroll: true });
+    },
   });
+  const gaming = () => frame.classList.contains('gaming');
   const remember = commandHistory(input);
 
   // Mission elapsed time since the sequence started, as DDD/HH:MM:SS
@@ -843,7 +857,7 @@ function initBoot() {
     input.value = '';
     frame.classList.add('awaiting');
     log.scrollTop = log.scrollHeight;
-    input.focus({ preventScroll: true });
+    if (!gaming()) input.focus({ preventScroll: true });
   }
 
   function askToConfirm() {
@@ -998,7 +1012,7 @@ function initBoot() {
 
   // Clicking the display skips ahead, or puts the cursor back in the prompt
   frame.addEventListener('click', () => {
-    if (!root.classList.contains('booting')) return;
+    if (!root.classList.contains('booting') || gaming()) return;
     if (waitingForInput()) input.focus({ preventScroll: true });
     else fast = true;
   });

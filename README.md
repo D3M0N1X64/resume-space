@@ -16,6 +16,7 @@ This site, and the commits co-authored by Claude, were built while attending the
 - Responsive layout for phones, and a print style that turns the page into a plain paper résumé
 - Small interactive terminal; its `mobile` command opens `mobile.html`, a preview of the site in phone-sized frames
 - Easter eggs (`js/eggs.js`), tracked by the `achievements` command. No spoilers here
+- LUNAR DEFENSE (`js/arcade.js`): a Galaga-style shooter in phosphor vectors, played on the display. Type `play` in a terminal. High scores with 3-letter initials are kept in your browser (`scores` lists them)
 
 ## Built with
 
@@ -26,6 +27,7 @@ index.html      page content
 css/style.css   styles, themes and print layout
 js/main.js      MFD frame, access screen, starfield, photo framing, clock, terminal
 js/eggs.js      easter eggs and achievements
+js/arcade.js    LUNAR DEFENSE, the arcade game
 images/         NASA photos and cutouts
 ```
 

@@ -86,6 +86,12 @@
       <button type="button" class="lbl when-site" style="grid-column: 3; --i: 9" data-key="b3" data-action="top" aria-label="Back to top"><span class="lbl-box">TOP</span></button>
       <button type="button" class="lbl when-site" style="grid-column: 4; --i: 10" data-key="b4" data-action="next" aria-label="Next section"><span class="lbl-box">NEXT</span></button>
       <button type="button" class="lbl when-site" style="grid-column: 5; --i: 11" data-key="b5" data-action="reset" aria-label="Restart the access screen"><span class="lbl-box">RESET</span></button>
+      <!-- Arcade controls while the game is up (arcade.js sets their text for each screen) -->
+      <button type="button" class="lbl when-game" style="grid-column: 1" data-key="b1" tabindex="-1"><span class="lbl-box">◄</span></button>
+      <button type="button" class="lbl when-game" style="grid-column: 2" data-key="b2" tabindex="-1"><span class="lbl-box">►</span></button>
+      <button type="button" class="lbl when-game" style="grid-column: 3" data-key="b3" tabindex="-1"><span class="lbl-box">PAUSE</span></button>
+      <button type="button" class="lbl when-game" style="grid-column: 4" data-key="b4" tabindex="-1"><span class="lbl-box">FIRE</span></button>
+      <button type="button" class="lbl when-game" style="grid-column: 5" data-key="b5" tabindex="-1"><span class="lbl-box">FIRE</span></button>
     </div>
 
     <div class="mfd-labels mfd-labels-left">
@@ -133,6 +139,10 @@
         <p class="selftest-title">MFD 2 · SELF TEST</p>
         <pre id="selftest-lines"></pre>
       </div>
+    </div>
+    <!-- LUNAR DEFENSE, the arcade game (arcade.js), started by "play" in a terminal -->
+    <div class="mfd-game">
+      <canvas id="game-canvas" aria-label="Lunar Defense arcade game. Arrow keys move, space fires, P pauses, Escape exits."></canvas>
     </div>
     <div class="mfd-toast" id="mfd-toast" role="status" aria-live="polite"></div>
 
@@ -534,6 +544,7 @@
   </footer>
 
   <script src="js/eggs.js"></script>
+  <script src="js/arcade.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

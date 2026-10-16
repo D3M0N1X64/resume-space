@@ -1938,6 +1938,69 @@ html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #
   .mfd-caution { display: none; }
 }
 
+/* ---------- Arcade: LUNAR DEFENSE (js/arcade.js) ---------- */
+/* The game fills the screen above the bottom label strip, whose keys become its controls */
+.mfd-game {
+  position: absolute;
+  inset: var(--bz-top) var(--bz-side) calc(var(--bz-bottom) + var(--lb-bottom));
+  z-index: 2;
+  display: none;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  background: radial-gradient(ellipse at center, #04140a 0%, #020b05 60%, #010302 100%);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html[data-phosphor="amber"] .mfd-game {
+  background: radial-gradient(ellipse at center, #171003 0%, #0e0902 60%, #040201 100%);
+}
+
+.mfd.gaming .mfd-game { display: block; }
+
+.mfd-game canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scanlines and darkened edges, as on the access screen */
+.mfd-game::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+html.gaming,
+html.gaming body {
+  overflow: hidden;
+}
+
+/* The bottom labels show the game's controls while it runs */
+.mfd-labels .when-game { display: none; }
+
+.mfd.gaming .mfd-labels-bottom .when-site,
+.mfd.gaming .mfd-labels-bottom .when-boot { display: none; }
+
+.mfd.gaming .mfd-labels-bottom .when-game {
+  display: flex;
+  visibility: visible;
+  opacity: 1;
+}
+
+.mfd.gaming .osb-bottom .osb,
+.mfd.gaming .mfd-labels-bottom .lbl {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ---------- Keyframes ---------- */
 @keyframes orbit {
   from { transform: translate(-60px, 40px) rotate(-8deg); }
