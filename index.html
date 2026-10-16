@@ -27,7 +27,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&family=B612:wght@700&family=B612+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -48,6 +48,11 @@
           <span id="boot-title">CREW ACCESS</span>
           <span id="boot-met">MET 000/00:00:00</span>
         </div>
+        <!-- A slowly turning globe drawn in characters (main.js) -->
+        <figure class="crt-planet" aria-hidden="true">
+          <pre id="boot-planet"></pre>
+          <figcaption id="boot-planet-caption">EARTH</figcaption>
+        </figure>
         <div class="crt-log" id="boot-log">
           <div id="boot-output" aria-live="polite"></div>
           <form class="crt-prompt-row" id="boot-form" hidden>
@@ -99,6 +104,7 @@
 
     <!-- The bezel -->
     <div class="mfd-glass" aria-hidden="true"></div>
+    <div class="mfd-face" aria-hidden="true"></div>
     <div class="mfd-rim" aria-hidden="true"></div>
     <span class="mfd-screw" style="top: 7px; left: 7px; --turn: 35deg" aria-hidden="true"></span>
     <span class="mfd-screw" style="top: 7px; right: 7px; --turn: -20deg" aria-hidden="true"></span>

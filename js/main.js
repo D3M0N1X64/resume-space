@@ -438,6 +438,167 @@ function initFrame(boot) {
   });
 }
 
+// ---------- ASCII globe for the access screen ----------
+// A small Earth drawn in characters: continents from fractal noise sampled on a sphere (so
+// they wrap around seamlessly), polar ice, sunlight from the upper left and a dark night
+// side with scattered city lights. It turns west to east while the access screen is up.
+function createAsciiPlanet(pre, caption) {
+  const TAU = Math.PI * 2;
+  const MAP_W = 96;
+  const MAP_H = 48;
+  const SEA = '..,,-~';         // dim to bright; light strokes so land stands out
+  const LAND = ':=+*#%@@';
+  const SUN = { x: -0.45, y: -0.35, z: 0.82 };   // y points down the screen
+  const sunLength = Math.hypot(SUN.x, SUN.y, SUN.z);
+
+  // Repeatable pseudo-random value for a lattice point, 0..1
+  function hash(x, y, z) {
+    let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(z, 1274126177)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+
+  // Smooth value noise in 3D, and a few octaves of it layered for coastline detail
+  function noise(x, y, z) {
+    const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+    const fx = x - ix, fy = y - iy, fz = z - iz;
+    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy), sz = fz * fz * (3 - 2 * fz);
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const corner = (dx, dy, dz) => hash(ix + dx, iy + dy, iz + dz);
+    return lerp(
+      lerp(lerp(corner(0, 0, 0), corner(1, 0, 0), sx), lerp(corner(0, 1, 0), corner(1, 1, 0), sx), sy),
+      lerp(lerp(corner(0, 0, 1), corner(1, 0, 1), sx), lerp(corner(0, 1, 1), corner(1, 1, 1), sx), sy),
+      sz
+    );
+  }
+
+  function fractal(x, y, z) {
+    let sum = 0;
+    let amp = 0.5;
+    let freq = 1;
+    for (let octave = 0; octave < 4; octave++) {
+      sum += amp * noise(x * freq, y * freq, z * freq);
+      amp /= 2;
+      freq *= 2;
+    }
+    return sum / 0.9375;
+  }
+
+  // The surface as a longitude/latitude grid: 0 sea, 1 land, 2 ice
+  const surface = new Uint8Array(MAP_W * MAP_H);
+  for (let j = 0; j < MAP_H; j++) {
+    const lat = ((j + 0.5) / MAP_H - 0.5) * Math.PI;
+    for (let i = 0; i < MAP_W; i++) {
+      const lon = ((i + 0.5) / MAP_W) * TAU;
+      const px = Math.cos(lat) * Math.cos(lon);
+      const py = Math.sin(lat);
+      const pz = Math.cos(lat) * Math.sin(lon);
+      const height = fractal(px * 1.8 + 7.3, py * 1.8 + 2.1, pz * 1.8 + 5.7);
+      surface[j * MAP_W + i] = Math.abs(lat) > 1.22 ? 2 : height > 0.56 ? 1 : 0;
+    }
+  }
+
+  // For each character cell on the disc: where it lands on the globe and how much sun it gets
+  let cells = [];
+  let rows = 0;
+  let cols = 0;
+
+  function layout() {
+    rows = window.matchMedia('(min-width: 760px)').matches ? 21 : 13;
+    // Characters are taller than they are wide, so size the grid to keep the globe round
+    const probe = document.createElement('span');
+    probe.textContent = '0000000000';
+    pre.replaceChildren(probe);
+    const style = getComputedStyle(pre);
+    const charWidth = probe.getBoundingClientRect().width / 10 || parseFloat(style.fontSize) * 0.6;
+    const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize);
+    cols = Math.round((rows * lineHeight) / charWidth);
+
+    cells = [];
+    for (let r = 0; r < rows; r++) {
+      const y = ((r + 0.5) / rows) * 2 - 1;
+      for (let c = 0; c < cols; c++) {
+        const x = ((c + 0.5) / cols) * 2 - 1;
+        const d = x * x + y * y;
+        if (d > 1) {
+          cells.push(null);
+          continue;
+        }
+        const z = Math.sqrt(1 - d);
+        const lat = Math.asin(-y);
+        cells.push({
+          row: Math.min(MAP_H - 1, Math.floor((lat / Math.PI + 0.5) * MAP_H)),
+          lon: Math.atan2(x, z),
+          light: (x * SUN.x + y * SUN.y + z * SUN.z) / sunLength,
+          rim: d > 0.86,   // the edge of the disc, traced faintly on the night side
+        });
+      }
+    }
+  }
+
+  let rotation = 0;
+  let timer = null;
+
+  function draw() {
+    let out = '';
+    let k = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++, k++) {
+        const cell = cells[k];
+        if (!cell) {
+          out += ' ';
+          continue;
+        }
+        // Subtracting the rotation moves features left to right, west to east
+        const lon = (((cell.lon - rotation) / TAU) % 1 + 1) % 1;
+        const i = Math.floor(lon * MAP_W);
+        const type = surface[cell.row * MAP_W + i];
+        const light = cell.light;
+        if (light < 0.05) {
+          // Night side: the faint edge of the disc, and a few city lights on land
+          out += cell.rim || (type === 1 && hash(i, cell.row, 99) < 0.16) ? '.' : ' ';
+          continue;
+        }
+        const ramp = type === 0 ? SEA : LAND;
+        const boost = type === 2 ? 3 : 0;   // ice is brighter than land
+        out += ramp[Math.min(ramp.length - 1, Math.floor(light * ramp.length) + boost)];
+      }
+      out += '\n';
+    }
+    pre.textContent = out;
+    // The longitude facing the viewer, written the usual way for Earth: 0–180° east or west
+    let degrees = Math.round(((((-rotation / TAU) % 1) + 1) % 1) * 360);
+    if (degrees > 180) degrees -= 360;
+    const side = degrees === 0 || degrees === 180 ? '' : degrees > 0 ? 'E' : 'W';
+    caption.textContent = 'EARTH · LON ' + String(Math.abs(degrees)).padStart(3, '0') + '°' + side;
+  }
+
+  function onResize() {
+    if (timer === null) return;
+    layout();
+    draw();
+  }
+  window.addEventListener('resize', onResize);
+
+  return {
+    start() {
+      layout();
+      draw();
+      clearInterval(timer);
+      if (reducedMotion) return;
+      // A full turn about every 24 seconds, redrawn ten times a second like a slow display
+      timer = setInterval(() => {
+        rotation = (rotation + TAU / 240) % TAU;
+        draw();
+      }, 100);
+    },
+    stop() {
+      clearInterval(timer);
+      timer = null;
+    },
+  };
+}
+
 // ---------- Access screen: the MFD's PowerShell-style prompt ----------
 // Runs a short system check, types a PowerShell command and asks to confirm it, like
 // PowerShell's own [Y]/[N] prompt (Enter on its own takes the default, Yes). Saying No drops
@@ -456,6 +617,7 @@ function initBoot() {
   const prompt = document.getElementById('boot-prompt');
   const input = document.getElementById('boot-input');
   const met = document.getElementById('boot-met');
+  const planet = createAsciiPlanet(document.getElementById('boot-planet'), document.getElementById('boot-planet-caption'));
 
   // The page behind the screen, kept out of reach until access is granted
   const site = document.querySelectorAll('body > :not(#mfd):not(.boot-backdrop):not(script)');
@@ -536,6 +698,7 @@ function initBoot() {
     tickMet();
     clearInterval(metTimer);
     metTimer = setInterval(tickMet, 1000);
+    planet.start();
     startUp(run);
   }
 
@@ -698,6 +861,7 @@ function initBoot() {
   function enterSite() {
     clearInterval(metTimer);
     const finish = () => {
+      planet.stop();
       root.classList.remove('booting');
       frame.classList.remove('entering', 'awaiting');
       backdrop.classList.remove('entering');

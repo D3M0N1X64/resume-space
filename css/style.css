@@ -953,6 +953,12 @@ code {
   --phos-dim: rgba(125, 255, 165, 0.45);
   --phos-line: rgba(125, 255, 165, 0.22);
   --phos-glow: 0 0 2px rgba(90, 255, 150, 0.55), 0 0 10px rgba(90, 255, 150, 0.18);
+  /* B612 was designed by Airbus for cockpit displays */
+  --font-mfd: 'B612 Mono', var(--font-mono);
+  --font-panel: 'B612', var(--font-display);
+  /* Powder-coat grain: SVG noise lit from the top left, so the paint has a fine, bumpy sheen.
+     The light is mid-grey so the grain averages out neutral when blended (soft-light). */
+  --powder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23a6a6a6' surfaceScale='1.2'%3E%3CfeDistantLight azimuth='225' elevation='50'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
 }
 
 .mfd {
@@ -970,7 +976,10 @@ code {
   inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
   z-index: 3;
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 30%);
+  /* Reflections on the glass: a soft curved band along the top and a diagonal sheen */
+  background:
+    radial-gradient(120% 55% at 50% -12%, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 62%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 30%);
   transition: background-color 0.4s ease-in;
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.75),
@@ -983,6 +992,25 @@ code {
 /* RESET: the screen goes dark before the access screen comes back */
 .mfd.powering-off .mfd-glass {
   background-color: #000;
+}
+
+/* The bezel's painted surface: powder-coat grain over the whole frame, with a hole cut
+   for the glass (the corners of that hole are hidden under the glass's rounded edge) */
+.mfd-face {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: var(--powder) 0 0 / 240px 240px;
+  mix-blend-mode: soft-light;
+  opacity: 0.45;
+  -webkit-mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--bz-side) var(--bz-top) / calc(100% - 2 * var(--bz-side)) calc(100% - var(--bz-top) - var(--bz-bottom)) no-repeat;
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--bz-side) var(--bz-top) / calc(100% - 2 * var(--bz-side)) calc(100% - var(--bz-top) - var(--bz-bottom)) no-repeat;
+  mask-composite: exclude;
 }
 
 /* Light falling on the top of the bezel and its outer edge */
@@ -1048,7 +1076,7 @@ code {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-family: var(--font-display);
+  font-family: var(--font-panel);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -1104,7 +1132,11 @@ code {
   padding: 0;
   border: 0;
   border-radius: 3px;
-  background: linear-gradient(180deg, #4b4f56 0%, #3a3d43 55%, #2f3237 100%);
+  /* The same powder-coat grain as the bezel, over a slightly domed face */
+  background:
+    var(--powder) 0 0 / 120px 120px,
+    linear-gradient(180deg, #4b4f56 0%, #3a3d43 55%, #2f3237 100%);
+  background-blend-mode: soft-light, normal;
   box-shadow:
     0 0 0 1px #0a0b0d,
     0 0 0 4px #27292d,
@@ -1132,7 +1164,7 @@ code {
   z-index: 2;
   display: grid;
   pointer-events: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-mfd);
   font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -1348,7 +1380,7 @@ html.booting .mfd.entering .mfd-scroll {
   border-radius: 14px;
   background: radial-gradient(ellipse at center, #06170c 0%, #031008 60%, #010402 100%);
   color: var(--phos);
-  font-family: var(--font-mono);
+  font-family: var(--font-mfd);
   font-size: clamp(12px, 0.45vw + 9px, 16px);
   line-height: 1.45;
   text-shadow: var(--phos-glow);
@@ -1361,7 +1393,8 @@ html.booting .mfd.entering .crt {
   transition: opacity 0.45s ease-in 0.85s;
 }
 
-/* Scanlines and darkened edges */
+/* Scanlines, then the curve of the tube: a soft catch-light where the bulge of the glass
+   faces the light, and edges and corners falling off into shadow */
 .crt::after {
   content: '';
   position: absolute;
@@ -1369,10 +1402,12 @@ html.booting .mfd.entering .crt {
   pointer-events: none;
   background:
     repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.6) 100%);
+    radial-gradient(ellipse 60% 45% at 38% 30%, rgba(190, 255, 215, 0.035), transparent 70%),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 85%, rgba(0, 0, 0, 0.75) 100%);
 }
 
 .crt-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1387,6 +1422,41 @@ html.booting .mfd.entering .crt {
   padding: 14px 0 7px;
   border-bottom: 1px solid var(--phos-line);
   letter-spacing: 0.08em;
+}
+
+/* The turning ASCII globe: centred above the text on narrow screens,
+   in the top-right corner (with the text kept clear of it) on wider ones */
+.crt-planet {
+  margin: 10px auto 0;
+  text-align: center;
+}
+
+.crt-planet pre {
+  margin: 0;
+  font: inherit;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 0 3px rgba(90, 255, 150, 0.45);
+}
+
+.crt-planet figcaption {
+  margin-top: 6px;
+  font-size: 0.72em;
+  letter-spacing: 0.12em;
+  color: var(--phos-dim);
+}
+
+@media (min-width: 760px) {
+  .crt-planet {
+    position: absolute;
+    top: 60px;
+    right: max(18px, var(--lb-side));
+    margin: 0;
+  }
+
+  .crt-planet pre { font-size: 10px; }
+  .crt-log { padding-right: 250px; }
 }
 
 .crt-log {
