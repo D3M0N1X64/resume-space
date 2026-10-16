@@ -195,10 +195,10 @@ function initEasterEggs() {
   // ----- Developer console: a note for the curious -----
   console.log(
     '%c\n' +
-    '  __  __ ___ ___    ___ \n' +
-    ' |  \\/  | __|   \\  |_  )\n' +
-    ' | |\\/| | _|| |) |  / / \n' +
-    ' |_|  |_|_| |___/  /___|\n',
+    '  __  __ ___ ___    ____\n' +
+    ' |  \\/  | __|   \\  |__ /\n' +
+    ' | |\\/| | _|| |) |  |_ \\\n' +
+    ' |_|  |_|_| |___/  |___/\n',
     'color:#4cc9f0;font-family:monospace;font-weight:bold'
   );
   console.log(

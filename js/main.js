@@ -815,7 +815,7 @@ function initBoot() {
     flicker();          // the tube flickers as it powers on...
     await wait(1100);   // ...and settles before the text starts
     if (!current()) return;
-    line('MEDS MFD 2 · BOOT ROM 4.07');
+    line('MEDS MFD 3 · BOOT ROM 4.07');
     line('LOADING FLIGHT SOFTWARE');
     await loadingBar(thisRun);
     if (!current()) return;

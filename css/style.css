@@ -53,7 +53,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--bz-top) + var(--lb-top) + 8px); /* keeps headings clear of the frame */
+  scroll-padding-top: calc(var(--bz-top) + var(--lb-top)); /* sections land just under the frame */
 }
 
 body {
@@ -257,6 +257,7 @@ code {
 /* A satellite drifting across the sky, rocking gently, its beacons blinking */
 .satellite {
   position: absolute;
+  z-index: 1;   /* behind the hero text (.hero-content) */
   top: 14%;
   left: 0;
   width: 64px;
@@ -291,6 +292,7 @@ code {
 
 .hero-content {
   position: relative;
+  z-index: 2;
   flex: 1;
   display: flex;
   align-items: center;
@@ -315,6 +317,12 @@ code {
   margin: 0 0 0.8rem;
 }
 
+.kicker.section-kicker {
+  --accent: #4cc9f0;   /* the hero is always dark, so the cyan stays in day mode too */
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+}
+
 .hero h1 {
   font-size: clamp(2.8rem, 7vw, 4.8rem);
   font-weight: 700;
@@ -328,6 +336,8 @@ code {
   color: #ffb347;
   margin: 0 0 1.2rem;
 }
+
+.hero-role span { white-space: nowrap; }
 
 .tagline {
   font-size: 1.15rem;
@@ -1238,7 +1248,14 @@ code {
 }
 
 /* ----- Labels on the screen's edges, each pointing at its key ----- */
+/* The label strips belong to the display, so they stay dark in day mode too;
+   only the page between them switches to light */
 .mfd-labels {
+  --accent: #4cc9f0;
+  --muted: #8ea3bf;
+  --track: rgba(120, 170, 255, 0.14);
+  --strip-bg: #070b14;
+  --strip-border: rgba(120, 170, 255, 0.16);
   position: absolute;
   z-index: 2;
   display: grid;
@@ -1247,8 +1264,8 @@ code {
   font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--muted);
-  background: var(--bg);
-  border: 0 solid var(--panel-border);
+  background: var(--strip-bg);
+  border: 0 solid var(--strip-border);
 }
 
 .mfd-labels-top,
@@ -1391,8 +1408,8 @@ html.booting .mfd-labels {
 html.booting .mfd.awaiting .mfd-labels { color: var(--phos); }
 
 html.booting .mfd.entering .mfd-labels {
-  background-color: var(--bg);
-  border-color: var(--panel-border);
+  background-color: var(--strip-bg);
+  border-color: var(--strip-border);
   color: var(--muted);
   text-shadow: none;
   transition: background-color 0.4s 0.3s, border-color 0.4s 0.3s, color 0.4s 0.3s, text-shadow 0.4s 0.3s;
@@ -1931,12 +1948,6 @@ html[data-phosphor="amber"] .mfd-labels {
 
 html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
 
-html[data-phosphor="amber"][data-theme="light"] .mfd-labels {
-  --accent: #b85f00;
-  color: rgba(184, 95, 0, 0.8);
-}
-
-html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #b85f00; }
 
 /* Hubble: clickable wherever the hero's text isn't on top of it */
 .hero-content { pointer-events: none; }
