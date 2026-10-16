@@ -110,12 +110,32 @@
     <span class="mfd-screw" style="top: 7px; right: 7px; --turn: -20deg" aria-hidden="true"></span>
     <span class="mfd-screw" style="bottom: 7px; left: 7px; --turn: 80deg" aria-hidden="true"></span>
     <span class="mfd-screw" style="bottom: 7px; right: 7px; --turn: 10deg" aria-hidden="true"></span>
-    <span class="rocker rocker-tl" aria-hidden="true"></span>
-    <span class="rocker rocker-tr" aria-hidden="true"></span>
-    <span class="rocker rocker-bl" aria-hidden="true"></span>
-    <span class="rocker rocker-br" aria-hidden="true"></span>
+    <!-- Rocker switches (eggs.js): press the top half to raise a setting, the bottom half to lower it -->
+    <div class="rocker rocker-tl" data-rocker="gain" data-label="GAIN" aria-hidden="true">
+      <button type="button" tabindex="-1" data-step="1"></button><button type="button" tabindex="-1" data-step="-1"></button>
+    </div>
+    <div class="rocker rocker-tr" data-rocker="sym" data-label="SYM" aria-hidden="true">
+      <button type="button" tabindex="-1" data-step="1"></button><button type="button" tabindex="-1" data-step="-1"></button>
+    </div>
+    <div class="rocker rocker-bl" data-rocker="brt" data-label="BRT" aria-hidden="true">
+      <button type="button" tabindex="-1" data-step="1"></button><button type="button" tabindex="-1" data-step="-1"></button>
+    </div>
+    <div class="rocker rocker-br" data-rocker="con" data-label="CON" aria-hidden="true">
+      <button type="button" tabindex="-1" data-step="1"></button><button type="button" tabindex="-1" data-step="-1"></button>
+    </div>
+    <button type="button" class="mfd-caution" tabindex="-1" aria-hidden="true">CAUTION</button>
     <span class="mfd-plate mfd-plate-left" aria-hidden="true">MFD 2</span>
-    <span class="mfd-plate mfd-plate-right" aria-hidden="true"><span class="mfd-lamp"></span>PWR</span>
+    <button type="button" class="mfd-plate mfd-plate-right mfd-power" tabindex="-1" aria-hidden="true"><span class="mfd-lamp"></span>PWR</button>
+
+    <!-- Screen effects for the easter eggs (eggs.js): power-off, self-test and short messages -->
+    <div class="mfd-blackout" aria-hidden="true"><span></span><span></span></div>
+    <div class="mfd-selftest" aria-hidden="true">
+      <div class="selftest-box">
+        <p class="selftest-title">MFD 2 · SELF TEST</p>
+        <pre id="selftest-lines"></pre>
+      </div>
+    </div>
+    <div class="mfd-toast" id="mfd-toast" role="status" aria-live="polite"></div>
 
     <!-- Keys; the labels above are the accessible controls, so these stay out of the tab order -->
     <div class="osb-row osb-top" aria-hidden="true">
@@ -178,6 +198,9 @@
           <span class="sat-light" style="left: 96%; top: 48%"></span>
           <span class="sat-light" style="left: 9.5%; top: 55%"></span>
         </div>
+        <!-- Click Hubble to lock on (eggs.js): brackets and an orbit readout -->
+        <span class="sat-reticle"></span>
+        <span class="sat-readout">TGT ACQ · HST<br>ALT ≈ 510 KM<br>INC 28.5°<br>VEL 7.6 KM/S<br>PERIOD 95 MIN</span>
       </div>
 
       <div class="hero-content">
@@ -511,6 +534,7 @@
     <p>&copy; <span id="year"></span> Ashton Lee</p>
   </footer>
 
+  <script src="js/eggs.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

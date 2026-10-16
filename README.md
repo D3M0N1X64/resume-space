@@ -15,6 +15,7 @@ This site, and the commits co-authored by Claude, were built while attending the
 - Telemetry-style summary panel with a live UTC clock
 - Responsive layout for phones, and a print style that turns the page into a plain paper résumé
 - Small interactive terminal; its `mobile` command opens `mobile.html`, a preview of the site in phone-sized frames
+- Easter eggs (`js/eggs.js`), tracked by the `achievements` command. No spoilers here
 
 ## Built with
 
@@ -23,7 +24,8 @@ Plain HTML, CSS and JavaScript. No frameworks and no build step. Hosted on GitHu
 ```
 index.html      page content
 css/style.css   styles, themes and print layout
-js/main.js      starfield, photo framing, clock, terminal and theme toggle
+js/main.js      MFD frame, access screen, starfield, photo framing, clock, terminal
+js/eggs.js      easter eggs and achievements
 images/         NASA photos and cutouts
 ```
 

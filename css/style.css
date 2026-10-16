@@ -1527,7 +1527,7 @@ html.booting .mfd.entering .crt {
 
 /* The tube settling after power-on: a few dips in brightness, then steady */
 .crt.flicker {
-  animation: crt-flicker 0.7s linear both;
+  animation: crt-flicker 0.7s linear;
 }
 
 @keyframes crt-flicker {
@@ -1582,6 +1582,391 @@ html.booting .mfd.entering .crt {
   .lbl .short { display: inline; }
   .crt-content { padding-left: 12px; padding-right: 12px; }
   html.booting .mfd { inset: 10px; }
+}
+
+/* ---------- Easter eggs (js/eggs.js) ---------- */
+
+/* BRT / CON rockers adjust the whole screen; SYM dims the labels on its edges */
+html.tuned main,
+html.tuned .site-footer,
+html.tuned .mfd-labels,
+html.tuned .crt {
+  filter: brightness(var(--scr-brt, 1)) contrast(var(--scr-con, 1));
+}
+
+.mfd-labels .lbl-box { opacity: var(--sym, 1); }
+
+/* The rocker switches are real controls: top half up, bottom half down */
+.rocker {
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.rocker button {
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.rocker.tilt-up { animation: rocker-up 0.25s ease-out; }
+.rocker.tilt-down { animation: rocker-down 0.25s ease-out; }
+
+/* Engraved names beside each rocker, on the side away from the screen */
+.rocker::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-panel);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #8f959e;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.rocker-tl::after,
+.rocker-bl::after { right: calc(100% + 4px); }
+
+.rocker-tr::after,
+.rocker-br::after { left: calc(100% + 4px); }
+
+@keyframes rocker-up {
+  40% { transform: perspective(80px) rotateX(18deg); }
+}
+
+@keyframes rocker-down {
+  40% { transform: perspective(80px) rotateX(-18deg); }
+}
+
+/* Master caution lamp in the top-left of the bezel: unlit amber glass until something's wrong */
+.mfd-caution {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--bz-top) / 2);
+  left: calc(var(--bz-side) + var(--lb-side) / 2);
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #0b0c0e;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3b2b10, #261a07);
+  box-shadow: 0 0 0 2px #26282c, inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  color: rgba(255, 179, 71, 0.28);
+  font-family: var(--font-panel);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.mfd-caution.lit {
+  background: linear-gradient(180deg, #ffc66b, #f59a1c);
+  color: #3a2200;
+  box-shadow: 0 0 0 2px #26282c, 0 0 14px rgba(255, 170, 60, 0.75);
+  animation: caution-blink 0.9s steps(1) infinite;
+}
+
+@keyframes caution-blink {
+  50% {
+    background: linear-gradient(180deg, #3b2b10, #261a07);
+    color: rgba(255, 179, 71, 0.35);
+    box-shadow: 0 0 0 2px #26282c, inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* PWR lamp is a button */
+.mfd-power {
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.mfd.power-down .mfd-lamp,
+.mfd.powered-off .mfd-lamp {
+  background: #17301f;
+  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Power-off: the picture closes in to a bright line, the line shrinks to a dot and goes dark;
+   power-on runs it back the other way */
+.mfd-blackout {
+  position: absolute;
+  inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
+  z-index: 2;
+  display: none;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.mfd.power-down .mfd-blackout,
+.mfd.powered-off .mfd-blackout,
+.mfd.power-up .mfd-blackout {
+  display: block;
+  pointer-events: auto;
+}
+
+.mfd-blackout span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #000;
+}
+
+.mfd-blackout span:first-child { top: 0; transform-origin: top; }
+.mfd-blackout span:last-child { bottom: 0; transform-origin: bottom; }
+
+.mfd-blackout::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: #eafff2;
+  box-shadow: 0 0 10px 2px rgba(200, 255, 220, 0.8);
+  opacity: 0;
+}
+
+.mfd.power-down .mfd-blackout span { animation: curtain-close 0.22s ease-in both; }
+.mfd.power-down .mfd-blackout::after { animation: line-off 0.5s ease-in 0.18s both; }
+.mfd.power-up .mfd-blackout span { animation: curtain-close 0.3s ease-out 0.3s reverse both; }
+.mfd.power-up .mfd-blackout::after { animation: line-on 0.6s ease-out both; }
+
+@keyframes curtain-close {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes line-off {
+  0%   { opacity: 1; transform: scaleX(1); }
+  60%  { opacity: 1; transform: scaleX(0.01); }
+  100% { opacity: 0; transform: scaleX(0.01); }
+}
+
+@keyframes line-on {
+  0%   { opacity: 0; transform: scaleX(0.01); }
+  25%  { opacity: 1; transform: scaleX(0.01); }
+  60%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* Self-test: alignment grid, a grey ramp and a results box */
+.mfd-selftest {
+  position: absolute;
+  inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
+  z-index: 2;
+  display: none;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, #000 0 12.5%, #1c1c1c 12.5% 25%, #383838 25% 37.5%, #555 37.5% 50%,
+      #717171 50% 62.5%, #8e8e8e 62.5% 75%, #aaa 75% 87.5%, #c6c6c6 87.5%) bottom / 100% 26px no-repeat,
+    repeating-linear-gradient(0deg, var(--phos-line) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, var(--phos-line) 0 1px, transparent 1px 40px),
+    #000;
+  color: var(--phos);
+  font-family: var(--font-mfd);
+  font-size: 13px;
+  text-shadow: var(--phos-glow);
+  pointer-events: auto;
+}
+
+.mfd.self-testing .mfd-selftest { display: grid; }
+
+.selftest-box {
+  min-width: 230px;
+  padding: 16px 22px;
+  border: 1px solid var(--phos);
+  background: #000;
+  box-shadow: 0 0 12px rgba(90, 255, 150, 0.25);
+}
+
+.selftest-title {
+  margin: 0 0 10px;
+  letter-spacing: 0.14em;
+}
+
+.selftest-box pre {
+  min-height: 7.5em;
+  margin: 0;
+  font: inherit;
+}
+
+/* Short messages near the top of the screen */
+.mfd-toast {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--bz-top) + var(--lb-top) + 14px);
+  left: 50%;
+  max-width: calc(100% - 2 * var(--bz-side) - 32px);
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--accent);
+  font-family: var(--font-mfd);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translate(-50%, -6px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+
+.mfd-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+html.booting .mfd-toast {
+  border-color: var(--phos);
+  background: rgba(1, 8, 4, 0.92);
+  color: var(--phos);
+  text-shadow: var(--phos-glow);
+}
+
+/* Konami code: amber phosphor ("night ops") */
+html[data-phosphor="amber"] {
+  --phos: #ffb347;
+  --phos-dim: rgba(255, 179, 71, 0.45);
+  --phos-line: rgba(255, 179, 71, 0.22);
+  --phos-glow: 0 0 2px rgba(255, 170, 60, 0.55), 0 0 10px rgba(255, 170, 60, 0.18);
+}
+
+html[data-phosphor="amber"] .crt { background: radial-gradient(ellipse at center, #1a1104 0%, #100a02 60%, #040201 100%); }
+html[data-phosphor="amber"] .crt-roll { background: linear-gradient(180deg, transparent, rgba(255, 179, 71, 0.035), transparent); }
+html[data-phosphor="amber"] .crt-planet pre { text-shadow: 0 0 3px rgba(255, 170, 60, 0.45); }
+html[data-phosphor="amber"] .crt-log .b-inverse span { color: #241400; box-shadow: 0 0 12px rgba(255, 170, 60, 0.45); }
+html[data-phosphor="amber"] .selftest-box { box-shadow: 0 0 12px rgba(255, 170, 60, 0.25); }
+
+/* On the site, the screen's labels and markers turn amber too */
+html[data-phosphor="amber"] .mfd-labels,
+html[data-phosphor="amber"] .mfd-toast {
+  --accent: #ffb347;
+  color: rgba(255, 179, 71, 0.75);
+}
+
+html[data-phosphor="amber"] .mfd-toast { color: #ffb347; }
+html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
+
+html[data-phosphor="amber"][data-theme="light"] .mfd-labels,
+html[data-phosphor="amber"][data-theme="light"] .mfd-toast {
+  --accent: #b85f00;
+  color: rgba(184, 95, 0, 0.8);
+}
+
+html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #b85f00; }
+
+/* Hubble: clickable wherever the hero's text isn't on top of it */
+.hero-content { pointer-events: none; }
+.hero-content > * { pointer-events: auto; }
+
+.satellite {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.satellite:hover .sat-craft img { filter: drop-shadow(0 0 4px rgba(76, 201, 240, 0.6)); }
+
+.sat-reticle,
+.sat-readout {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Corner brackets around the telescope */
+.sat-reticle {
+  inset: -10px -8px;
+  background:
+    linear-gradient(#4cc9f0 0 0) left top / 10px 2px,
+    linear-gradient(#4cc9f0 0 0) left top / 2px 10px,
+    linear-gradient(#4cc9f0 0 0) right top / 10px 2px,
+    linear-gradient(#4cc9f0 0 0) right top / 2px 10px,
+    linear-gradient(#4cc9f0 0 0) left bottom / 10px 2px,
+    linear-gradient(#4cc9f0 0 0) left bottom / 2px 10px,
+    linear-gradient(#4cc9f0 0 0) right bottom / 10px 2px,
+    linear-gradient(#4cc9f0 0 0) right bottom / 2px 10px;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(76, 201, 240, 0.6));
+}
+
+.sat-readout {
+  top: -6px;
+  left: calc(100% + 16px);
+  padding: 6px 9px;
+  border: 1px solid rgba(76, 201, 240, 0.5);
+  border-radius: 3px;
+  background: rgba(4, 10, 20, 0.8);
+  color: #4cc9f0;
+  font-family: var(--font-mfd);
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Near the right edge the readout goes on the other side, so it isn't cut off */
+.satellite.readout-left .sat-readout {
+  left: auto;
+  right: calc(100% + 16px);
+}
+
+/* The satellite flies tilted 8° (the orbit animation); keep its readout level */
+@media (prefers-reduced-motion: no-preference) {
+  .sat-readout { transform: rotate(8deg); }
+}
+
+.satellite.locked .sat-reticle {
+  opacity: 1;
+  animation: reticle-lock 0.4s ease-out;
+}
+
+.satellite.locked .sat-readout { opacity: 1; }
+
+@keyframes reticle-lock {
+  from { transform: scale(1.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* The access screen's globe can be clicked; "globe" draws one in a terminal */
+.crt-planet { cursor: pointer; }
+
+.t-globe pre {
+  margin: 6px 0 2px;
+  font: inherit;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+}
+
+.t-globe p {
+  margin: 0 0 6px;
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+/* The caution lamp lives with the other wide-screen bezel parts */
+@media (max-width: 999px) {
+  .mfd-caution { display: none; }
 }
 
 /* ---------- Keyframes ---------- */

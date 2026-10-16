@@ -214,9 +214,10 @@ function initScrollReveal() {
 
 // ---------- Terminal commands ----------
 // Shared by the site's terminal and the access screen, so both answer the same way.
-// print(text, type) adds a line, clear() empties the screen; extraHelp adds lines to "help",
-// and onContact runs after "contact".
-function terminalCommands({ print, clear, extraHelp = '', onContact }) {
+// print(text, type) adds a line, append(node) adds an element, clear() empties the screen;
+// extraHelp adds lines to "help", and onContact runs after "contact". Each command gets the
+// words typed after it. The hidden easter-egg commands come from eggs.js.
+function terminalCommands({ print, append, clear, extraHelp = '', onContact }) {
   // Read names straight from the page so the terminal stays in sync with the content
   function listFromPage(selector) {
     return Array.from(document.querySelectorAll(selector))
@@ -224,7 +225,7 @@ function terminalCommands({ print, clear, extraHelp = '', onContact }) {
       .join('\n');
   }
 
-  return {
+  const commands = {
     help: () => print(
       'Available commands:\n' +
       extraHelp +
@@ -233,10 +234,11 @@ function terminalCommands({ print, clear, extraHelp = '', onContact }) {
       '  skills      list skills\n' +
       '  experience  list roles\n' +
       '  education   list education\n' +
-      '  accolades   list achievements\n' +
+      '  accolades   list awards and honors\n' +
       '  contact     show my email\n' +
       '  mobile      preview the site on phone screens\n' +
       '  theme       switch light and dark mode\n' +
+      '  achievements  easter eggs you\'ve found\n' +
       '  clear       clear the terminal'
     ),
     whoami: () => print(
@@ -267,6 +269,7 @@ function terminalCommands({ print, clear, extraHelp = '', onContact }) {
     },
     clear,
   };
+  return Object.assign(hiddenCommands({ print, append }), commands);
 }
 
 // Up/Down arrows in a terminal input move through previous commands
@@ -310,6 +313,10 @@ function initTerminal() {
 
   const commands = terminalCommands({
     print,
+    append: (node) => {
+      output.appendChild(node);
+      output.scrollTop = output.scrollHeight;
+    },
     clear: () => { output.innerHTML = ''; },
     onContact: () => setTimeout(() => document.getElementById('contact').scrollIntoView(), 700),
   });
@@ -323,9 +330,10 @@ function initTerminal() {
     remember(raw);
     print('$ ' + raw, 't-user');
 
-    const name = raw.split(/\s+/)[0].toLowerCase();
+    const [word, ...args] = raw.split(/\s+/);
+    const name = word.toLowerCase();
     if (commands[name]) {
-      commands[name]();
+      commands[name](args);
     } else {
       print('Command not found: ' + name + '. Type help for the list.', 't-error');
     }
@@ -441,9 +449,11 @@ function initFrame(boot) {
 // ---------- ASCII globe for the access screen ----------
 // A small Earth drawn in characters: continents from fractal noise sampled on a sphere (so
 // they wrap around seamlessly), polar ice, sunlight from the upper left and a dark night
-// side with scattered city lights. It turns west to east while the access screen is up.
-function createAsciiPlanet(pre, caption) {
+// side with scattered city lights. It turns west to east while the access screen is up, and
+// spinHome() whirls it round to Alabama with a blinking marker. options.rows sets its size.
+function createAsciiPlanet(pre, caption, options = {}) {
   const TAU = Math.PI * 2;
+  const HOME = { lat: 32.8, lon: -86.8 };   // Alabama
   const MAP_W = 96;
   const MAP_H = 48;
   const SEA = '..,,-~';         // dim to bright; light strokes so land stands out
@@ -504,7 +514,7 @@ function createAsciiPlanet(pre, caption) {
   let cols = 0;
 
   function layout() {
-    rows = window.matchMedia('(min-width: 760px)').matches ? 21 : 13;
+    rows = options.rows || (window.matchMedia('(min-width: 760px)').matches ? 21 : 13);
     // Characters are taller than they are wide, so size the grid to keep the globe round
     const probe = document.createElement('span');
     probe.textContent = '0000000000';
@@ -538,13 +548,24 @@ function createAsciiPlanet(pre, caption) {
 
   let rotation = 0;
   let timer = null;
+  let spin = null;      // an ease-out whirl toward home, while spinHome() runs
+  let atHome = false;   // holding still on home, with the marker blinking
+  let frozen = false;   // stopped for good: keep the marker showing
 
   function draw() {
+    // Home sits in the middle column once the globe has turned to face it
+    const markerRow = atHome ? Math.round(((1 - Math.sin((HOME.lat * Math.PI) / 180)) / 2) * rows - 0.5) : -1;
+    const markerCol = Math.floor(cols / 2);
+    const markerOn = frozen || Math.floor(performance.now() / 400) % 2 === 0;
     let out = '';
     let k = 0;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++, k++) {
         const cell = cells[k];
+        if (r === markerRow && c === markerCol && markerOn) {
+          out += 'X';
+          continue;
+        }
         if (!cell) {
           out += ' ';
           continue;
@@ -566,6 +587,10 @@ function createAsciiPlanet(pre, caption) {
       out += '\n';
     }
     pre.textContent = out;
+    if (atHome) {
+      caption.textContent = 'HOME · ALABAMA · 32.8°N 086.8°W';
+      return;
+    }
     // The longitude facing the viewer, written the usual way for Earth: 0–180° east or west
     let degrees = Math.round(((((-rotation / TAU) % 1) + 1) % 1) * 360);
     if (degrees > 180) degrees -= 360;
@@ -580,21 +605,65 @@ function createAsciiPlanet(pre, caption) {
   }
   window.addEventListener('resize', onResize);
 
+  // One frame: follow the whirl if there is one, otherwise turn slowly (unless parked at home)
+  function tick() {
+    if (spin) {
+      const t = Math.min(1, (performance.now() - spin.start) / spin.duration);
+      rotation = spin.from + (spin.to - spin.from) * (1 - Math.pow(1 - t, 3));
+      if (t === 1) {
+        rotation = spin.to % TAU;
+        const done = spin.done;
+        spin = null;
+        atHome = true;
+        if (done) done();
+      }
+    } else if (!atHome) {
+      rotation = (rotation + TAU / 400) % TAU;   // a full turn about every 24 seconds
+    }
+    draw();
+  }
+
+  function run() {
+    clearInterval(timer);
+    timer = setInterval(tick, 60);
+  }
+
   return {
     start() {
+      spin = null;
+      atHome = false;
+      frozen = false;
       layout();
       draw();
-      clearInterval(timer);
-      if (reducedMotion) return;
-      // A full turn about every 24 seconds, redrawn ten times a second like a slow display
-      timer = setInterval(() => {
-        rotation = (rotation + TAU / 240) % TAU;
-        draw();
-      }, 100);
+      if (!reducedMotion) run();
     },
     stop() {
       clearInterval(timer);
       timer = null;
+      if (atHome) {
+        frozen = true;
+        draw();
+      }
+    },
+    // Whirl round (a couple of turns, slowing down) until Alabama faces the viewer, then mark it
+    spinHome(onDone) {
+      const target = ((((-HOME.lon * Math.PI) / 180) % TAU) + TAU) % TAU;
+      atHome = false;
+      if (reducedMotion) {
+        rotation = target;
+        atHome = true;
+        frozen = true;
+        draw();
+        if (onDone) onDone();
+        return;
+      }
+      const ahead = (((target - rotation) % TAU) + TAU) % TAU;
+      spin = { from: rotation, to: rotation + 2 * TAU + ahead, start: performance.now(), duration: 2600, done: onDone };
+      if (timer === null) run();
+    },
+    // Back to turning slowly after showing home
+    resume() {
+      atHome = false;
     },
   };
 }
@@ -618,6 +687,12 @@ function initBoot() {
   const input = document.getElementById('boot-input');
   const met = document.getElementById('boot-met');
   const planet = createAsciiPlanet(document.getElementById('boot-planet'), document.getElementById('boot-planet-caption'));
+  let homeTimer = null;
+  document.querySelector('.crt-planet').addEventListener('click', () => {
+    clearTimeout(homeTimer);
+    planet.spinHome(() => { homeTimer = setTimeout(() => planet.resume(), 5000); });
+    achievements.unlock('globe');
+  });
 
   // The page behind the screen, kept out of reach until access is granted
   const site = document.querySelectorAll('body > :not(#mfd):not(.boot-backdrop):not(script)');
@@ -672,6 +747,10 @@ function initBoot() {
   // The same commands as the site's terminal, plus "open"
   const commands = terminalCommands({
     print: (text) => line(text),
+    append: (node) => {
+      output.appendChild(node);
+      log.scrollTop = log.scrollHeight;
+    },
     clear: () => { output.innerHTML = ''; },
     extraHelp: '  open        open the crew record (enter the site)\n',
   });
@@ -780,9 +859,10 @@ function initBoot() {
 
   // Runs one of the shared commands; returns false if there's no such command
   function runShared(raw) {
-    const name = raw.split(/\s+/)[0].toLowerCase();
+    const [word, ...args] = raw.split(/\s+/);
+    const name = word.toLowerCase();
     if (!commands[name]) return false;
-    commands[name]();
+    commands[name](args);
     return true;
   }
 
@@ -951,6 +1031,7 @@ function initYear() {
 
 // ---------- Start everything ----------
 initFrame(initBoot());
+initEasterEggs();
 initHeroFraming();
 initStarfield();
 initClock();
