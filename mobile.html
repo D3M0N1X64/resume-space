@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ashton Lee · Phone Preview</title>
+  <meta name="robots" content="noindex">
+  <!-- Opened by the "mobile" command in the site's terminals. Each frame is the real site at a
+       phone's screen size; "?boot" makes it play the access screen even if this tab has seen it. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #070b14;
+      color: #dbe6f5;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .kicker {
+      margin: 0 0 6px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      color: #4cc9f0;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+      font-size: 1.6rem;
+    }
+
+    .note {
+      max-width: 640px;
+      margin: 0 0 26px;
+      text-align: center;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #8ea3bf;
+    }
+
+    .note a { color: #4cc9f0; }
+
+    .phones {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    figure {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .phone {
+      padding: 14px;
+      border-radius: 46px;
+      background: #1b1e24;
+      box-shadow: 0 0 0 2px #2c3038, 0 30px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    iframe {
+      display: block;
+      border: 0;
+      border-radius: 34px;
+      background: #000;
+    }
+
+    figcaption {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.78rem;
+      color: #8ea3bf;
+    }
+
+    button {
+      padding: 6px 14px;
+      border: 1px solid rgba(120, 170, 255, 0.3);
+      border-radius: 6px;
+      background: transparent;
+      color: #4cc9f0;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+
+    button:hover { background: rgba(76, 201, 240, 0.12); }
+
+    /* On a small screen the phones are shrunk to fit */
+    @media (max-width: 480px) {
+      .phone { zoom: 0.78; }
+    }
+  </style>
+</head>
+<body>
+  <p class="kicker">// MOBILE PREVIEW</p>
+  <h1>The résumé on a phone</h1>
+  <p class="note">
+    Each frame is the live site at a phone's screen size. Click inside one to use it; the mouse wheel scrolls.
+    Restart replays the access screen. <a href="./">Back to the full site</a>
+  </p>
+
+  <div class="phones">
+    <figure>
+      <div class="phone"><iframe id="phone-1" title="Site at 390 by 844 (iPhone)" width="390" height="844" src="index.html?boot"></iframe></div>
+      <figcaption>iPhone 14 / 15 · 390 × 844</figcaption>
+      <button type="button" data-restart="phone-1">RESTART</button>
+    </figure>
+    <figure>
+      <div class="phone"><iframe id="phone-2" title="Site at 360 by 780 (Android)" width="360" height="780" src="index.html?boot"></iframe></div>
+      <figcaption>Typical Android · 360 × 780</figcaption>
+      <button type="button" data-restart="phone-2">RESTART</button>
+    </figure>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-restart]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var frame = document.getElementById(button.dataset.restart);
+        frame.src = 'index.html?boot';
+      });
+    });
+  </script>
+</body>
+</html>

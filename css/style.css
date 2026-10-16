@@ -53,11 +53,16 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 70px; /* keeps headings clear of the sticky nav */
+  scroll-padding-top: calc(var(--bz-top) + var(--lb-top) + 8px); /* keeps headings clear of the frame */
 }
 
 body {
   margin: 0;
+  /* Room for the MFD frame, so the page shows inside its screen */
+  padding:
+    calc(var(--bz-top) + var(--lb-top))
+    calc(var(--bz-side) + var(--lb-side))
+    calc(var(--bz-bottom) + var(--lb-bottom));
   font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.65;
@@ -126,123 +131,6 @@ code {
 
 [data-theme="light"] .btn-ghost { color: var(--accent); }
 
-/* ---------- Navigation ---------- */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(7, 11, 20, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(120, 170, 255, 0.14);
-}
-
-.nav {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0.7rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.nav-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: #e6eefb;
-  text-decoration: none;
-  margin-right: auto;
-  white-space: nowrap;
-}
-
-.monogram {
-  display: grid;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: #4cc9f0;
-  border: 1px solid rgba(76, 201, 240, 0.5);
-  border-radius: 6px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.3rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links a {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #b6c5dc;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.nav-links a:hover,
-.nav-links a:focus-visible {
-  color: #4cc9f0;
-}
-
-.theme-toggle {
-  display: grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  padding: 0;
-  background: transparent;
-  border: 1px solid rgba(120, 170, 255, 0.3);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.theme-toggle svg {
-  width: 1.1rem;
-  height: 1.1rem;
-  fill: none;
-  stroke: #dbe6f5;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Show the icon for the theme you would switch TO */
-.theme-icon-light { display: none; }
-[data-theme="dark"] .theme-icon-light { display: block; }
-[data-theme="dark"] .theme-icon-dark { display: none; }
-
-/* Hamburger (narrow screens only) */
-.nav-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.4rem;
-  order: 3;
-}
-
-.nav-toggle span {
-  width: 22px;
-  height: 2px;
-  background: #dbe6f5;
-  transition: transform 0.3s, opacity 0.3s;
-}
-
-.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
 /* ---------- Hero ---------- */
 /* main.js sets these from the photo's framing (fallbacks shown):
    --sx/--sy  where the sun rises (light mode)
@@ -251,7 +139,8 @@ code {
   --sx: 90%;
   --sy: 78%;
   position: relative;
-  min-height: calc(100vh - 58px);
+  min-height: calc(100vh - var(--chrome-y));
+  min-height: calc(100dvh - var(--chrome-y));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1045,6 +934,586 @@ code {
   transform: none;
 }
 
+/* ---------- The MFD frame around the site ---------- */
+/* The site is shown on the screen of a cockpit multi-function display (MFD). The bezel is
+   fixed around the window and the page scrolls normally behind the glass: the bezel
+   thickness (--bz-*) plus the label strips along the screen's edges (--lb-*) become the
+   body's padding. Each key in the bezel presses the on-screen label beside it.
+   The frame is a physical part, so it looks the same in light and dark mode. */
+:root {
+  --bz-top: 60px;      /* bezel */
+  --bz-bottom: 60px;
+  --bz-side: 64px;
+  --lb-top: 34px;      /* label strips on the screen */
+  --lb-bottom: 34px;
+  --lb-side: 88px;
+  --chrome-y: calc(var(--bz-top) + var(--lb-top) + var(--lb-bottom) + var(--bz-bottom));
+  --bezel: #1f2125;
+  --phos: #7dffa5;                       /* green phosphor, for the access screen */
+  --phos-dim: rgba(125, 255, 165, 0.45);
+  --phos-line: rgba(125, 255, 165, 0.22);
+  --phos-glow: 0 0 2px rgba(90, 255, 150, 0.55), 0 0 10px rgba(90, 255, 150, 0.18);
+}
+
+.mfd {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: hidden;
+  pointer-events: none;   /* only keys, labels and the access screen take clicks */
+}
+
+/* The glass. Its huge outer shadow paints the bezel around a rounded opening,
+   with a dark lip and a thin bevel where the glass meets the frame. */
+.mfd-glass {
+  position: absolute;
+  inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
+  z-index: 3;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 30%);
+  transition: background-color 0.4s ease-in;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.75),
+    inset 0 3px 12px rgba(0, 0, 0, 0.5),
+    0 0 0 2px #08090b,
+    0 0 0 3px #3a3d43,
+    0 0 0 100vmax var(--bezel);
+}
+
+/* RESET: the screen goes dark before the access screen comes back */
+.mfd.powering-off .mfd-glass {
+  background-color: #000;
+}
+
+/* Light falling on the top of the bezel and its outer edge */
+.mfd-rim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 70px 90px -70px rgba(255, 255, 255, 0.06);
+}
+
+/* Dzus fasteners in the corners */
+.mfd-screw {
+  position: absolute;
+  z-index: 5;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #8d929a, #34373c 70%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.mfd-screw::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 4px;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.65);
+  transform: rotate(var(--turn, 30deg));
+}
+
+/* Rocker switches in the corners (gain, symbology, brightness, contrast) */
+.rocker {
+  position: absolute;
+  z-index: 5;
+  width: 16px;
+  height: 38px;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, transparent calc(50% - 1px), #0d0e10 calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(180deg, #50545b 0%, #3b3e44 45%, #2b2e33 55%, #34373d 100%);
+  box-shadow: 0 0 0 1px #0b0c0e, 0 0 0 3px #26282c, inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.rocker-tl { left: calc(var(--bz-side) / 2 - 8px); top: calc(var(--bz-top) / 2 - 12px); }
+.rocker-tr { right: calc(var(--bz-side) / 2 - 8px); top: calc(var(--bz-top) / 2 - 12px); }
+.rocker-bl { left: calc(var(--bz-side) / 2 - 8px); bottom: calc(var(--bz-bottom) / 2 - 12px); }
+.rocker-br { right: calc(var(--bz-side) / 2 - 8px); bottom: calc(var(--bz-bottom) / 2 - 12px); }
+
+/* Engraved markings on the bottom bezel */
+.mfd-plate {
+  position: absolute;
+  bottom: 0;
+  z-index: 5;
+  width: var(--lb-side);
+  height: var(--bz-bottom);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #9ea4ad;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.mfd-plate-left { left: var(--bz-side); }
+.mfd-plate-right { right: var(--bz-side); }
+
+.mfd-lamp {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4dff86;
+  box-shadow: 0 0 6px #4dff86, inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* ----- Keys (option select buttons) ----- */
+.osb-row,
+.osb-col {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.osb-top,
+.osb-bottom {
+  left: calc(var(--bz-side) + var(--lb-side));
+  right: calc(var(--bz-side) + var(--lb-side));
+}
+
+.osb-top { top: 0; height: var(--bz-top); grid-template-columns: repeat(7, 1fr); }
+.osb-bottom { bottom: 0; height: var(--bz-bottom); grid-template-columns: repeat(5, 1fr); }
+
+.osb-left,
+.osb-right {
+  top: calc(var(--bz-top) + var(--lb-top));
+  bottom: calc(var(--bz-bottom) + var(--lb-bottom));
+  width: var(--bz-side);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.osb-left { left: 0; }
+.osb-right { right: 0; }
+
+.osb {
+  width: 42px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #4b4f56 0%, #3a3d43 55%, #2f3237 100%);
+  box-shadow:
+    0 0 0 1px #0a0b0d,
+    0 0 0 4px #27292d,
+    0 2px 0 4px #141518,
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.osb-col .osb { width: 32px; height: 36px; }
+
+.osb:active {
+  transform: translateY(1px);
+  background: linear-gradient(180deg, #3f4248 0%, #34373c 100%);
+  box-shadow:
+    0 0 0 1px #0a0b0d,
+    0 0 0 4px #27292d,
+    0 1px 0 4px #141518,
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ----- Labels on the screen's edges, each pointing at its key ----- */
+.mfd-labels {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  pointer-events: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  background: var(--bg);
+  border: 0 solid var(--panel-border);
+}
+
+.mfd-labels-top,
+.mfd-labels-bottom {
+  left: var(--bz-side);
+  right: var(--bz-side);
+  padding: 0 var(--lb-side);
+}
+
+.mfd-labels-top {
+  top: var(--bz-top);
+  height: var(--lb-top);
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom-width: 1px;
+}
+
+.mfd-labels-bottom {
+  bottom: var(--bz-bottom);
+  height: var(--lb-bottom);
+  grid-template-columns: repeat(5, 1fr);
+  border-top-width: 1px;
+}
+
+.mfd-labels-bottom .lbl { grid-row: 1; }
+
+.mfd-labels-left,
+.mfd-labels-right {
+  top: calc(var(--bz-top) + var(--lb-top));
+  bottom: calc(var(--bz-bottom) + var(--lb-bottom));
+  width: var(--lb-side);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.mfd-labels-left { left: var(--bz-side); border-right-width: 1px; }
+.mfd-labels-right { right: var(--bz-side); border-left-width: 1px; }
+
+.lbl {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.lbl:hover,
+.lbl:focus-visible { color: var(--accent); }
+
+.lbl:focus-visible { outline-offset: -2px; }
+
+.lbl-box {
+  padding: 2px 5px;
+  border-radius: 2px;
+}
+
+/* The selected option is boxed, as on a real MFD */
+.lbl.is-active .lbl-box,
+[data-theme="light"] .mode-day,
+[data-theme="dark"] .mode-ngt {
+  color: var(--accent);
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.lbl .short { display: none; }
+
+/* Short leader lines from each label to its key */
+.lbl::before {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.mfd-labels-top .lbl::before    { top: 0; left: 50%; width: 1px; height: 6px; }
+.mfd-labels-bottom .lbl::before { bottom: 0; left: 50%; width: 1px; height: 6px; }
+.mfd-labels-left .lbl::before   { left: 0; top: 50%; width: 6px; height: 1px; }
+.mfd-labels-right .lbl::before  { right: 0; top: 50%; width: 6px; height: 1px; }
+
+/* Scroll position, drawn on the screen's right edge (the window's own scrollbar is hidden) */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+
+.mfd-scroll {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  right: 9px;
+  width: 2px;
+  background: var(--track);
+}
+
+.mfd-scroll span {
+  position: absolute;
+  left: -1px;
+  width: 4px;
+  top: 0;
+  height: 20%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* ----- The access screen (only while <html> has "booting") ----- */
+.boot-backdrop,
+.crt,
+.when-boot { display: none; }
+
+html.booting,
+html.booting body {
+  overflow: hidden;
+}
+
+html.booting .boot-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 899;
+  background: radial-gradient(ellipse at 50% 40%, #1b2029 0%, #0b0e13 60%, #040507 100%);
+}
+
+/* Once the display fills the window, the cover over the page fades with the terminal */
+html.booting .boot-backdrop.entering {
+  opacity: 0;
+  transition: opacity 0.45s ease-in 0.85s;
+}
+
+/* The display sits centred and large, then grows to the window's edges */
+html.booting .mfd {
+  inset: max(16px, (100vh - 900px) / 2) max(16px, (100vw - 1240px) / 2);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px #0b0c0e, 0 40px 100px rgba(0, 0, 0, 0.7);
+}
+
+/* Fades in on first load only; after RESET the display is already there */
+html.booting .mfd:not(.rebooted) {
+  animation: mfd-in 0.5s ease-out both;
+}
+
+/* RESET: the dark display shrinks back to its size on the access screen,
+   and the CRT stays off until it gets there */
+html.booting .mfd.shrinking {
+  transition: inset 0.9s cubic-bezier(0.6, 0, 0.25, 1), border-radius 0.9s, box-shadow 0.9s;
+}
+
+html.booting .mfd.shrinking .crt { display: none; }
+
+html.booting .mfd.entering {
+  inset: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transition: inset 0.9s cubic-bezier(0.6, 0, 0.25, 1), border-radius 0.9s, box-shadow 0.9s;
+}
+
+html.booting .crt { display: block; }
+html.booting .when-boot { display: flex; }
+
+html.booting .when-site,
+html.booting .mfd-scroll {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* On the access screen the labels glow on the CRT instead of sitting on the page */
+html.booting .mfd-labels {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--phos-dim);
+  text-shadow: var(--phos-glow);
+}
+
+html.booting .mfd.awaiting .mfd-labels { color: var(--phos); }
+
+html.booting .mfd.entering .mfd-labels {
+  background-color: var(--bg);
+  border-color: var(--panel-border);
+  color: var(--muted);
+  text-shadow: none;
+  transition: background-color 0.4s 0.9s, border-color 0.4s 0.9s, color 0.4s 0.9s, text-shadow 0.4s 0.9s;
+}
+
+html.booting .mfd.entering .when-boot {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Site labels light up one after another once the screen switches over */
+html.booting .mfd.entering .when-site,
+html.booting .mfd.entering .mfd-scroll {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.4s ease calc(1.1s + var(--i, 0) * 60ms);
+}
+
+.crt {
+  position: absolute;
+  inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 14px;
+  background: radial-gradient(ellipse at center, #06170c 0%, #031008 60%, #010402 100%);
+  color: var(--phos);
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 0.45vw + 9px, 16px);
+  line-height: 1.45;
+  text-shadow: var(--phos-glow);
+  cursor: text;
+  pointer-events: auto;
+}
+
+html.booting .mfd.entering .crt {
+  opacity: 0;
+  transition: opacity 0.45s ease-in 0.85s;
+}
+
+/* Scanlines and darkened edges */
+.crt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.crt-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 max(18px, var(--lb-side)) var(--lb-bottom);
+  animation: crt-on 0.75s ease-out both;
+}
+
+.crt-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 14px 0 7px;
+  border-bottom: 1px solid var(--phos-line);
+  letter-spacing: 0.08em;
+}
+
+.crt-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+  scrollbar-width: none;
+}
+
+.crt-log::-webkit-scrollbar { display: none; }
+
+.crt-log p {
+  margin: 0;
+  min-height: 1.45em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.crt-log .b-dim { color: var(--phos-dim); }
+
+.crt-log .b-inverse span {
+  padding: 0 0.5em;
+  background: var(--phos);
+  color: #021a0b;
+  text-shadow: none;
+  box-shadow: 0 0 12px rgba(90, 255, 150, 0.45);
+}
+
+.crt-prompt-row label { white-space: pre-wrap; }
+
+.crt-prompt-row input {
+  width: min(24ch, 100%);
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  caret-color: var(--phos);
+  font: inherit;
+  font-size: max(16px, 1em);   /* 16px keeps phones from zooming in on focus */
+  text-shadow: inherit;
+}
+
+/* A faint bright band rolling slowly down the screen */
+.crt-roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 30%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(125, 255, 165, 0.035), transparent);
+  animation: crt-roll 7s linear infinite;
+}
+
+@keyframes mfd-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* CRT power-on: a bright line that opens out into the picture */
+@keyframes crt-on {
+  0%   { transform: scale(1, 0.004); opacity: 0.3; filter: brightness(3); }
+  35%  { transform: scale(1, 0.004); opacity: 1; filter: brightness(3); }
+  70%  { transform: scale(1, 1); filter: brightness(1.6); }
+  100% { transform: none; filter: none; }
+}
+
+/* The tube settling after power-on: a few dips in brightness, then steady */
+.crt.flicker {
+  animation: crt-flicker 0.7s linear both;
+}
+
+@keyframes crt-flicker {
+  0%   { filter: brightness(1); }
+  6%   { filter: brightness(0.35); }
+  10%  { filter: brightness(1.25); }
+  18%  { filter: brightness(0.8); }
+  24%  { filter: brightness(1); }
+  41%  { filter: brightness(0.55); }
+  45%  { filter: brightness(1.15); }
+  62%  { filter: brightness(0.9); }
+  66%  { filter: brightness(1); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes crt-roll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(440%); }
+}
+
+/* Narrower screens: keys along the top and bottom only, and a slimmer bezel */
+@media (max-width: 999px) {
+  :root {
+    --bz-side: 12px;
+    --lb-side: 0px;
+  }
+
+  .osb-col,
+  .mfd-labels-left,
+  .mfd-labels-right,
+  .rocker,
+  .mfd-plate { display: none; }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --bz-top: 42px;
+    --bz-bottom: 42px;
+    --bz-side: 8px;
+    --lb-top: 26px;
+    --lb-bottom: 26px;
+  }
+
+  .osb { width: 34px; height: 21px; }
+  .mfd-glass,
+  .crt { border-radius: 10px; }
+  .mfd-screw { width: 8px; height: 8px; }
+  .mfd-screw::after { top: 3px; }
+  .mfd-labels { font-size: 9.5px; letter-spacing: 0.04em; }
+  .lbl-box { padding: 1px 3px; }
+  .lbl .long { display: none; }
+  .lbl .short { display: inline; }
+  .crt-content { padding-left: 12px; padding-right: 12px; }
+  html.booting .mfd { inset: 10px; }
+}
+
 /* ---------- Keyframes ---------- */
 @keyframes orbit {
   from { transform: translate(-60px, 40px) rotate(-8deg); }
@@ -1067,34 +1536,6 @@ code {
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 980px) {
-  .nav-toggle {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    gap: 0;
-    background: rgba(7, 11, 20, 0.96);
-    border-bottom: 1px solid rgba(120, 170, 255, 0.14);
-    padding: 0.5rem 0;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links a {
-    display: block;
-    padding: 0.75rem 1.5rem;
-  }
-}
-
 @media (max-width: 860px) {
   .about-grid {
     grid-template-columns: 1fr;
@@ -1137,8 +1578,6 @@ code {
 }
 
 @media (max-width: 480px) {
-  .nav-logo .monogram { display: none; }
-
   .mission-card,
   .edu-card,
   .contact-card {
@@ -1167,6 +1606,7 @@ code {
   }
 
   body {
+    padding: 0;
     background: none;
     font-size: 10.5pt;
     line-height: 1.45;
@@ -1178,7 +1618,14 @@ code {
     margin: 0;
   }
 
-  .site-header,
+  /* Printing while the access screen is up still prints the whole résumé */
+  html.booting,
+  html.booting body {
+    overflow: visible;
+  }
+
+  .mfd,
+  .boot-backdrop,
   .scene-photo,
   .starfield,
   .sky-tint,

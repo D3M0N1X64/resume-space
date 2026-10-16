@@ -5,7 +5,7 @@
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---------- Theme toggle (light / dark) ----------
+// ---------- Light / dark theme ----------
 // The initial theme is set by a small script in <head> so the page doesn't flash.
 function toggleTheme() {
   const root = document.documentElement;
@@ -13,31 +13,6 @@ function toggleTheme() {
   root.setAttribute('data-theme', next);
   try { localStorage.setItem('space-theme', next); } catch (e) { /* storage blocked: theme just won't be remembered */ }
   return next;
-}
-
-function initThemeToggle() {
-  document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
-}
-
-// ---------- Mobile navigation ----------
-function initMobileNav() {
-  const toggle = document.querySelector('.nav-toggle');
-  const links = document.getElementById('nav-links');
-
-  function setOpen(isOpen) {
-    links.classList.toggle('open', isOpen);
-    toggle.setAttribute('aria-expanded', String(isOpen));
-    toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-  }
-
-  toggle.addEventListener('click', () => {
-    setOpen(!links.classList.contains('open'));
-  });
-
-  // Close the menu after picking a section
-  links.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => setOpen(false));
-  });
 }
 
 // ---------- Framing the hero photo ----------
@@ -237,23 +212,11 @@ function initScrollReveal() {
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 }
 
-// ---------- Terminal ----------
-function initTerminal() {
-  const form = document.getElementById('terminal-form');
-  const input = document.getElementById('terminal-input');
-  const output = document.getElementById('terminal-output');
-  const history = [];
-  let historyIndex = 0;
-
-  // Add a line of text to the terminal. textContent keeps user input from being run as HTML.
-  function print(text, type = 't-info') {
-    const line = document.createElement('p');
-    line.className = type;
-    line.textContent = text;
-    output.appendChild(line);
-    output.scrollTop = output.scrollHeight;
-  }
-
+// ---------- Terminal commands ----------
+// Shared by the site's terminal and the access screen, so both answer the same way.
+// print(text, type) adds a line, clear() empties the screen; extraHelp adds lines to "help",
+// and onContact runs after "contact".
+function terminalCommands({ print, clear, extraHelp = '', onContact }) {
   // Read names straight from the page so the terminal stays in sync with the content
   function listFromPage(selector) {
     return Array.from(document.querySelectorAll(selector))
@@ -261,9 +224,10 @@ function initTerminal() {
       .join('\n');
   }
 
-  const commands = {
+  return {
     help: () => print(
       'Available commands:\n' +
+      extraHelp +
       '  help        show this list\n' +
       '  whoami      a short introduction\n' +
       '  skills      list skills\n' +
@@ -271,6 +235,7 @@ function initTerminal() {
       '  education   list education\n' +
       '  accolades   list achievements\n' +
       '  contact     show my email\n' +
+      '  mobile      preview the site on phone screens\n' +
       '  theme       switch light and dark mode\n' +
       '  clear       clear the terminal'
     ),
@@ -284,14 +249,70 @@ function initTerminal() {
     accolades: () => print('Accolades:\n' + listFromPage('.accolade-card h3')),
     contact: () => {
       print('Email: ashton.redsky@gmail.com', 't-ok');
-      setTimeout(() => document.getElementById('contact').scrollIntoView(), 700);
+      if (onContact) onContact();
+    },
+    // Opens mobile.html (the site in phone-sized frames) in a new tab
+    mobile: () => {
+      if (window.innerWidth < 600) {
+        print('You\'re already on a phone-sized screen, so this is the mobile layout.', 't-ok');
+        return;
+      }
+      const tab = window.open('mobile.html', '_blank');
+      if (tab) print('Opening the phone preview in a new tab.', 't-ok');
+      else print('Pop-up blocked. Open mobile.html on this site to see the preview.', 't-error');
     },
     theme: () => {
       const theme = toggleTheme();
       print('Switched to ' + theme + ' mode.', 't-ok');
     },
-    clear: () => { output.innerHTML = ''; },
+    clear,
   };
+}
+
+// Up/Down arrows in a terminal input move through previous commands
+function commandHistory(input) {
+  const history = [];
+  let index = 0;
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowUp' && index > 0) {
+      index--;
+      input.value = history[index];
+      event.preventDefault();
+    } else if (event.key === 'ArrowDown') {
+      index = Math.min(index + 1, history.length);
+      input.value = history[index] || '';
+      event.preventDefault();
+    }
+  });
+
+  return (command) => {
+    history.push(command);
+    index = history.length;
+  };
+}
+
+// ---------- Terminal ----------
+function initTerminal() {
+  const form = document.getElementById('terminal-form');
+  const input = document.getElementById('terminal-input');
+  const output = document.getElementById('terminal-output');
+  const remember = commandHistory(input);
+
+  // Add a line of text to the terminal. textContent keeps user input from being run as HTML.
+  function print(text, type = 't-info') {
+    const line = document.createElement('p');
+    line.className = type;
+    line.textContent = text;
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  const commands = terminalCommands({
+    print,
+    clear: () => { output.innerHTML = ''; },
+    onContact: () => setTimeout(() => document.getElementById('contact').scrollIntoView(), 700),
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -299,8 +320,7 @@ function initTerminal() {
     input.value = '';
     if (!raw) return;
 
-    history.push(raw);
-    historyIndex = history.length;
+    remember(raw);
     print('$ ' + raw, 't-user');
 
     const name = raw.split(/\s+/)[0].toLowerCase();
@@ -308,19 +328,6 @@ function initTerminal() {
       commands[name]();
     } else {
       print('Command not found: ' + name + '. Type help for the list.', 't-error');
-    }
-  });
-
-  // Up/Down arrows move through previous commands
-  input.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp' && historyIndex > 0) {
-      historyIndex--;
-      input.value = history[historyIndex];
-      event.preventDefault();
-    } else if (event.key === 'ArrowDown') {
-      historyIndex = Math.min(historyIndex + 1, history.length);
-      input.value = history[historyIndex] || '';
-      event.preventDefault();
     }
   });
 
@@ -346,14 +353,440 @@ function initCopyEmail() {
   });
 }
 
+// ---------- The MFD frame: keys, labels and scroll position ----------
+// The site is shown on the screen of a cockpit display. The labels on the screen's edges
+// are the real links and buttons; each key in the bezel presses the label beside it.
+// boot is the access screen (for RESET).
+function initFrame(boot) {
+  const frame = document.getElementById('mfd');
+
+  // A key presses whichever label is showing beside it (the access screen has its own set)
+  frame.querySelectorAll('.osb').forEach((key) => {
+    key.addEventListener('click', (event) => {
+      const label = Array.from(frame.querySelectorAll('.lbl[data-key="' + key.dataset.key + '"]'))
+        .find((el) => el.getClientRects().length && getComputedStyle(el).visibility === 'visible');
+      if (label) {
+        label.click();
+        event.stopPropagation();   // the label handled it; don't also count as a click on the display
+      }
+    });
+  });
+
+  // Sections in page order, for PREV / NEXT and for boxing the current one in the top labels
+  const navLabels = Array.from(frame.querySelectorAll('.mfd-labels-top .lbl'));
+  const sections = [document.getElementById('home')]
+    .concat(navLabels.map((label) => document.querySelector(label.getAttribute('href'))));
+  const thumb = frame.querySelector('.mfd-scroll span');
+  let current = 0;
+
+  function update() {
+    const page = document.documentElement;
+    const line = parseFloat(getComputedStyle(page).scrollPaddingTop) + 60;
+    current = 0;
+    sections.forEach((section, i) => {
+      if (section.getBoundingClientRect().top <= line) current = i;
+    });
+    // At the very bottom, the last section counts as current even if it's short
+    if (window.innerHeight + window.scrollY >= page.scrollHeight - 2) current = sections.length - 1;
+
+    navLabels.forEach((label, i) => {
+      const active = i === current - 1;
+      label.classList.toggle('is-active', active);
+      if (active) label.setAttribute('aria-current', 'location');
+      else label.removeAttribute('aria-current');
+    });
+
+    // The scroll marker on the right edge of the screen
+    const visible = window.innerHeight / page.scrollHeight;
+    const travel = page.scrollHeight - window.innerHeight;
+    const size = Math.max(8, visible * 100);
+    thumb.style.height = size + '%';
+    thumb.style.top = (travel > 0 ? window.scrollY / travel : 0) * (100 - size) + '%';
+  }
+
+  let queued = false;
+  window.addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      update();
+    });
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+
+  function goTo(index) {
+    const target = sections[Math.max(0, Math.min(sections.length - 1, index))];
+    if (target === sections[0]) window.scrollTo({ top: 0 });
+    else target.scrollIntoView();
+  }
+
+  const actions = {
+    theme: toggleTheme,
+    prev: () => goTo(current - 1),
+    next: () => goTo(current + 1),
+    top: () => window.scrollTo({ top: 0 }),
+    'page-up': () => window.scrollBy({ top: -window.innerHeight * 0.7 }),
+    'page-down': () => window.scrollBy({ top: window.innerHeight * 0.7 }),
+    print: () => window.print(),
+    reset: () => boot.reset(),
+  };
+
+  frame.querySelectorAll('[data-action]').forEach((label) => {
+    label.addEventListener('click', () => actions[label.dataset.action]());
+  });
+}
+
+// ---------- Access screen: the MFD's PowerShell-style prompt ----------
+// Runs a short system check, types a PowerShell command and asks to confirm it, like
+// PowerShell's own [Y]/[N] prompt (Enter on its own takes the default, Yes). Saying No drops
+// to a crew shell with the same commands as the site's terminal, plus "open" to try again.
+// On Yes the display grows out to the window's edges and the screen switches to the site;
+// BYPASS goes straight there. Pressing a key or clicking while it types skips ahead.
+// Shown once per browser session; RESET on the site shrinks the display back and runs it again.
+function initBoot() {
+  const root = document.documentElement;
+  const frame = document.getElementById('mfd');
+  const crt = document.getElementById('boot-crt');
+  const backdrop = document.querySelector('.boot-backdrop');
+  const log = document.getElementById('boot-log');
+  const output = document.getElementById('boot-output');
+  const form = document.getElementById('boot-form');
+  const prompt = document.getElementById('boot-prompt');
+  const input = document.getElementById('boot-input');
+  const met = document.getElementById('boot-met');
+
+  // The page behind the screen, kept out of reach until access is granted
+  const site = document.querySelectorAll('body > :not(#mfd):not(.boot-backdrop):not(script)');
+
+  const SHELL = 'PS C:\\CREW> ';
+  const COMMAND = 'Open-CrewRecord -Name "Ashton Lee"';
+  const CONFIRM = '[Y] Yes  [N] No  [?] Help (default is "Y"): ';
+
+  // 'typing' while the screen runs by itself, 'confirm' at the Y/N prompt,
+  // 'shell' at the crew shell prompt, 'done' once on the way to the site (or on the site)
+  let mode = 'done';
+  let fast = reducedMotion;   // skip the typing delays
+  let run = 0;                // which run of the sequence is current, so an old one stops typing
+  let loaded = 0;
+  let metTimer = null;
+
+  const waitingForInput = () => mode === 'confirm' || mode === 'shell';
+  const wait = (ms) => (fast ? Promise.resolve() : new Promise((done) => setTimeout(done, ms)));
+
+  // A status line with dot leaders, e.g. "DATA BUS 1-4 ......... NOMINAL"
+  const status = (label, value) => label + ' ' + '.'.repeat(Math.max(3, 24 - label.length)) + ' ' + value;
+
+  function line(text = '', className) {
+    const p = document.createElement('p');
+    if (className) p.className = className;
+    p.textContent = text;
+    output.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+    return p;
+  }
+
+  function banner(text) {
+    line();
+    const highlight = document.createElement('span');
+    highlight.textContent = text;
+    line('', 'b-inverse').appendChild(highlight);
+  }
+
+  async function type(p, text, thisRun) {
+    const start = p.textContent;
+    for (let i = 0; i < text.length; i++) {
+      if (thisRun !== run) return;
+      if (fast) {
+        p.textContent = start + text;
+        return;
+      }
+      p.textContent += text[i];
+      await wait(30 + Math.random() * 45);
+    }
+  }
+
+  // The same commands as the site's terminal, plus "open"
+  const commands = terminalCommands({
+    print: (text) => line(text),
+    clear: () => { output.innerHTML = ''; },
+    extraHelp: '  open        open the crew record (enter the site)\n',
+  });
+  const remember = commandHistory(input);
+
+  // Mission elapsed time since the sequence started, as DDD/HH:MM:SS
+  const pad = (n, width = 2) => String(n).padStart(width, '0');
+  function tickMet() {
+    const s = Math.floor((Date.now() - loaded) / 1000);
+    met.textContent = 'MET ' + pad(Math.floor(s / 86400), 3) + '/' + pad(Math.floor(s / 3600) % 24) + ':' +
+      pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+  }
+
+  // Start (or restart) the sequence on a blank screen
+  function begin() {
+    run++;
+    mode = 'typing';
+    fast = reducedMotion;
+    output.innerHTML = '';
+    form.hidden = true;
+    frame.classList.remove('awaiting');
+    site.forEach((el) => { el.inert = true; });
+    loaded = Date.now();
+    tickMet();
+    clearInterval(metTimer);
+    metTimer = setInterval(tickMet, 1000);
+    startUp(run);
+  }
+
+  // Restart the CSS flicker on the screen, as the tube settles after power-on
+  function flicker() {
+    crt.classList.remove('flicker');
+    void crt.offsetWidth;   // reflow, so the animation plays again
+    crt.classList.add('flicker');
+  }
+
+  // A loading bar that fills in uneven steps, with the odd stall, like real loading
+  async function loadingBar(thisRun) {
+    const CELLS = 24;
+    const bar = line();
+    let percent = 0;
+    while (percent < 100) {
+      if (thisRun !== run || mode === 'done') return;
+      const filled = Math.round((percent / 100) * CELLS);
+      bar.textContent = '[' + '█'.repeat(filled) + '░'.repeat(CELLS - filled) + '] ' + String(percent).padStart(3) + '%';
+      await wait(Math.random() < 0.15 ? 220 : 40 + Math.random() * 50);
+      percent = fast ? 100 : Math.min(100, percent + 2 + Math.floor(Math.random() * 7));
+    }
+    bar.textContent = '[' + '█'.repeat(CELLS) + '] 100%';
+  }
+
+  async function startUp(thisRun) {
+    const current = () => thisRun === run && mode !== 'done';
+    await wait(800);   // let the CRT warm up
+    if (!current()) return;
+    flicker();
+    await wait(700);
+    if (!current()) return;
+    line('MEDS MFD 2 · BOOT ROM 4.07');
+    line('LOADING FLIGHT SOFTWARE');
+    await loadingBar(thisRun);
+    if (!current()) return;
+    line('FLIGHT SOFTWARE LOADED', 'b-dim');
+    line();
+    await wait(300);
+    const checks = [
+      ['GPC 1 SELF-TEST', 'PASS'],
+      ['DATA BUS 1-4', 'NOMINAL'],
+      ['S-BAND UPLINK', 'LOCKED'],
+      ['CREW RECORDS', 'MOUNTED'],
+    ];
+    for (const [label, value] of checks) {
+      if (!current()) return;
+      line(status(label, value));
+      await wait(260);
+    }
+    if (!current()) return;
+    line();
+    const command = line(SHELL);
+    await wait(400);
+    await type(command, COMMAND, thisRun);
+    await wait(350);
+    if (current()) askToConfirm();
+  }
+
+  function showPrompt(text, nextMode) {
+    if (mode === 'done') return;
+    mode = nextMode;
+    prompt.textContent = text;
+    form.hidden = false;
+    input.value = '';
+    frame.classList.add('awaiting');
+    log.scrollTop = log.scrollHeight;
+    input.focus({ preventScroll: true });
+  }
+
+  function askToConfirm() {
+    if (mode === 'done') return;
+    line();
+    line('Confirm');
+    line('Are you sure you want to perform this action?');
+    line('Performing the operation "Open-CrewRecord" on target "LEE, ASHTON (Network Administrator)".');
+    showPrompt(CONFIRM, 'confirm');
+  }
+
+  // Runs one of the shared commands; returns false if there's no such command
+  function runShared(raw) {
+    const name = raw.split(/\s+/)[0].toLowerCase();
+    if (!commands[name]) return false;
+    commands[name]();
+    return true;
+  }
+
+  async function submit(raw) {
+    if (!waitingForInput()) return;
+    const answeredAt = mode;
+    mode = 'typing';
+    frame.classList.remove('awaiting');
+    form.hidden = true;
+
+    const reply = raw.trim();
+    line(prompt.textContent + reply);   // leave the prompt and answer on screen, as PowerShell does
+    if (answeredAt === 'confirm') await confirmReply(reply);
+    else shellCommand(reply);
+  }
+
+  async function confirmReply(reply) {
+    const choice = reply.toLowerCase();
+    if (choice === '' || choice === 'y' || choice === 'yes') {
+      await grant();
+    } else if (choice === 'n' || choice === 'no') {
+      line('Open-CrewRecord : The operation was canceled by the user.');
+      line('Crew record remains locked. Type help to see commands, or open to try again.', 'b-dim');
+      line();
+      showPrompt(SHELL, 'shell');
+    } else {
+      // PowerShell's own help for "?"; crew commands also work here; anything else asks again
+      if (choice === '?') {
+        line('Y - Continue with only the next step of the operation.');
+        line('N - Skip this operation and proceed with the next operation.');
+      } else {
+        runShared(reply);
+      }
+      showPrompt(CONFIRM, 'confirm');
+    }
+  }
+
+  function shellCommand(raw) {
+    if (raw) remember(raw);
+    const name = raw.split(/\s+/)[0].toLowerCase();
+    if (name === 'open' || name === 'open-crewrecord') {
+      askToConfirm();
+      return;
+    }
+    if (raw && !runShared(raw)) line('Command not found: ' + name + '. Type help for the list.', 'b-dim');
+    showPrompt(SHELL, 'shell');
+  }
+
+  async function grant() {
+    mode = 'done';
+    try { sessionStorage.setItem('space-access', 'granted'); } catch (e) { /* storage blocked: ask again next visit */ }
+    line();
+    for (const label of ['VERIFYING CREDENTIALS', 'DECRYPTING RECORD']) {
+      await wait(400);
+      line(status(label, 'OK'));
+    }
+    await wait(400);
+    banner('ACCESS GRANTED · WELCOME ABOARD');
+    await wait(1000);
+    enterSite();
+  }
+
+  // Straight to the site, whatever the screen is doing
+  function bypass() {
+    if (mode === 'done') return;
+    mode = 'done';
+    try { sessionStorage.setItem('space-access', 'granted'); } catch (e) { /* storage blocked: ask again next visit */ }
+    form.hidden = true;
+    frame.classList.remove('awaiting');
+    banner('ACCESS BYPASSED');
+    enterSite();
+  }
+
+  // Grow the display to the window's edges while the terminal fades into the site (CSS
+  // .entering), then hand over. The access screen stays in the page, hidden, for RESET.
+  function enterSite() {
+    clearInterval(metTimer);
+    const finish = () => {
+      root.classList.remove('booting');
+      frame.classList.remove('entering', 'awaiting');
+      backdrop.classList.remove('entering');
+      site.forEach((el) => { el.inert = false; });
+    };
+    if (reducedMotion) {
+      finish();
+      return;
+    }
+    frame.classList.add('entering');
+    backdrop.classList.add('entering');
+    setTimeout(finish, 2600);
+  }
+
+  // RESET on the site: the screen goes dark, the display shrinks back to its size on the
+  // access screen (CSS .shrinking), then the CRT powers on and the sequence runs again
+  function reset() {
+    if (root.classList.contains('booting')) return;
+    try { sessionStorage.removeItem('space-access'); } catch (e) { /* storage blocked: it always shows anyway */ }
+    const goBack = () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      frame.classList.add('rebooted');   // no fade-in this time, the display is already there
+      root.classList.add('booting');
+    };
+    if (reducedMotion) {
+      goBack();
+      begin();
+      return;
+    }
+    frame.classList.add('powering-off');
+    setTimeout(() => {
+      frame.classList.add('shrinking');
+      goBack();
+      setTimeout(() => {
+        frame.classList.remove('shrinking', 'powering-off');
+        begin();
+      }, 950);
+    }, 450);
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    submit(input.value);
+  });
+
+  // The labels along the bottom (their keys press them too). At the Y/N prompt they answer it;
+  // at the crew shell YES opens the record, NO just gives a fresh prompt and HELP lists commands.
+  const keyInput = {
+    Y: { confirm: 'Y', shell: 'open' },
+    N: { confirm: 'N', shell: '' },
+    '?': { confirm: 'help', shell: 'help' },
+  };
+  frame.querySelectorAll('[data-answer]').forEach((label) => {
+    label.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (waitingForInput()) submit(keyInput[label.dataset.answer][mode]);
+      else fast = true;
+    });
+  });
+  frame.querySelector('[data-boot="bypass"]').addEventListener('click', (event) => {
+    event.stopPropagation();
+    bypass();
+  });
+
+  // Clicking the display skips ahead, or puts the cursor back in the prompt
+  frame.addEventListener('click', () => {
+    if (!root.classList.contains('booting')) return;
+    if (waitingForInput()) input.focus({ preventScroll: true });
+    else fast = true;
+  });
+
+  // Any key skips ahead; once a prompt is up, typing goes to it even if it lost focus
+  document.addEventListener('keydown', (event) => {
+    if (!root.classList.contains('booting')) return;
+    if (!waitingForInput()) fast = true;
+    else if (document.activeElement !== input && !event.target.closest('button')) input.focus({ preventScroll: true });
+  });
+
+  if (root.classList.contains('booting')) begin();
+  return { reset };
+}
+
 // ---------- Footer year ----------
 function initYear() {
   document.getElementById('year').textContent = new Date().getFullYear();
 }
 
 // ---------- Start everything ----------
-initThemeToggle();
-initMobileNav();
+initFrame(initBoot());
 initHeroFraming();
 initStarfield();
 initClock();
