@@ -330,6 +330,26 @@ code {
   margin-bottom: 0.3rem;
 }
 
+/* The name with a wireframe network sphere turning beside it */
+.hero-name {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.8rem, 2vw, 1.4rem);
+  margin-bottom: 0.3rem;
+}
+
+.hero-name h1 { margin-bottom: 0; }
+
+.net-sphere {
+  flex: none;
+  width: clamp(3.4rem, 8vw, 5.6rem);
+  height: clamp(3.4rem, 8vw, 5.6rem);
+}
+
+@media print {
+  .net-sphere { display: none; }
+}
+
 .hero-role {
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 2vw, 1rem);

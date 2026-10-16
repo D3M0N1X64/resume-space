@@ -184,6 +184,128 @@ function initStarfield() {
   }).observe(canvas);
 }
 
+// ---------- Network sphere beside the name ----------
+// Nodes spread evenly over a sphere (a Fibonacci lattice), each linked to its nearest
+// neighbours like a network map, turning slowly. Lines and nodes fade toward the back.
+// Cyan normally, amber with the Konami code; it spins up while the mouse is over it.
+function initNetSphere() {
+  const canvas = document.querySelector('.net-sphere');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const COUNT = 42;
+  const TILT = 0.38;   // the axis leans toward the viewer a little
+
+  const nodes = [];
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < COUNT; i++) {
+    const y = 1 - (i + 0.5) * (2 / COUNT);
+    const r = Math.sqrt(1 - y * y);
+    nodes.push({ x: Math.cos(i * golden) * r, y, z: Math.sin(i * golden) * r });
+  }
+
+  // Link each node to its three nearest neighbours (each pair once)
+  const links = new Set();
+  nodes.forEach((a, i) => {
+    nodes
+      .map((b, j) => ({ j, d: (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2 }))
+      .filter((n) => n.j !== i)
+      .sort((p, q) => p.d - q.d)
+      .slice(0, 3)
+      .forEach(({ j }) => links.add(i < j ? i + '-' + j : j + '-' + i));
+  });
+  const edges = [...links].map((key) => key.split('-').map(Number));
+
+  let size = 0;
+  function resize() {
+    const ratio = window.devicePixelRatio || 1;
+    size = canvas.clientWidth;
+    canvas.width = canvas.height = Math.round(size * ratio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  function draw(angle) {
+    ctx.clearRect(0, 0, size, size);
+    const half = size / 2;
+    const radius = half * 0.86;
+    const cosA = Math.cos(angle), sinA = Math.sin(angle);
+    const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+    // Spin about the vertical axis, then tilt toward the viewer
+    const points = nodes.map((n) => {
+      const x = n.x * cosA + n.z * sinA;
+      const z1 = -n.x * sinA + n.z * cosA;
+      const y = n.y * cosT - z1 * sinT;
+      const z = n.y * sinT + z1 * cosT;
+      return { sx: half + x * radius, sy: half + y * radius, depth: (z + 1) / 2 };   // 0 back, 1 front
+    });
+
+    const amber = document.documentElement.dataset.phosphor === 'amber';
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = amber ? '#ffb347' : '#4cc9f0';
+    for (const [a, b] of edges) {
+      const p = points[a], q = points[b];
+      ctx.globalAlpha = 0.08 + 0.5 * ((p.depth + q.depth) / 2) ** 1.5;
+      ctx.beginPath();
+      ctx.moveTo(p.sx, p.sy);
+      ctx.lineTo(q.sx, q.sy);
+      ctx.stroke();
+    }
+    ctx.fillStyle = amber ? '#ffd59a' : '#9fe4ff';
+    for (const p of points) {
+      ctx.globalAlpha = 0.15 + 0.85 * p.depth ** 1.5;
+      ctx.beginPath();
+      ctx.arc(p.sx, p.sy, 0.8 + 1.4 * p.depth, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  resize();
+  new ResizeObserver(() => {
+    resize();
+    draw(angle);
+  }).observe(canvas);
+
+  let angle = 0.6;
+  draw(angle);
+
+  // Redraw in the new colour when the Konami code switches the phosphor
+  new MutationObserver(() => draw(angle)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-phosphor'] });
+  if (reducedMotion) return;
+
+  // A full turn about every 40 seconds, spinning up to one every 2 seconds under the mouse
+  // and easing back down after; only while the hero is on screen
+  const CRUISE = (Math.PI * 2) / 40;
+  const FAST = (Math.PI * 2) / 2;
+  let speed = CRUISE;
+  let hovered = false;
+  canvas.addEventListener('pointerenter', () => { hovered = true; });
+  canvas.addEventListener('pointerleave', () => { hovered = false; });
+
+  let running = false;
+  let last = 0;
+  function frame(time) {
+    if (!running) return;
+    if (last) {
+      const dt = Math.min(0.05, (time - last) / 1000);
+      speed += ((hovered ? FAST : CRUISE) - speed) * Math.min(1, dt * (hovered ? 3 : 1.2));
+      angle += dt * speed;
+    }
+    last = time;
+    draw(angle);
+    requestAnimationFrame(frame);
+  }
+  new IntersectionObserver((entries) => {
+    const visible = entries[0].isIntersecting;
+    if (visible && !running) {
+      running = true;
+      last = 0;
+      requestAnimationFrame(frame);
+    } else if (!visible) {
+      running = false;
+    }
+  }).observe(canvas);
+}
+
 // ---------- UTC clock on the telemetry panel ----------
 function initClock() {
   const clock = document.getElementById('utc-clock');
@@ -1087,6 +1209,7 @@ initFrame(initBoot());
 initEasterEggs();
 initHeroFraming();
 initStarfield();
+initNetSphere();
 initClock();
 initScrollReveal();
 initTerminal();
