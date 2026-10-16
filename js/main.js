@@ -672,14 +672,13 @@ function createAsciiPlanet(pre, caption, options = {}) {
 // Runs a short system check, types a PowerShell command and asks to confirm it, like
 // PowerShell's own [Y]/[N] prompt (Enter on its own takes the default, Yes). Saying No drops
 // to a crew shell with the same commands as the site's terminal, plus "open" to try again.
-// On Yes the display grows out to the window's edges and the screen switches to the site;
-// BYPASS goes straight there. Pressing a key or clicking while it types skips ahead.
-// Shown once per browser session; RESET on the site shrinks the display back and runs it again.
+// On Yes the terminal dissolves into the site; BYPASS goes straight there. Pressing a key or
+// clicking while it types skips ahead. Shown once per browser session; RESET on the site
+// powers the screen down and runs it again.
 function initBoot() {
   const root = document.documentElement;
   const frame = document.getElementById('mfd');
   const crt = document.getElementById('boot-crt');
-  const backdrop = document.querySelector('.boot-backdrop');
   const log = document.getElementById('boot-log');
   const output = document.getElementById('boot-output');
   const form = document.getElementById('boot-form');
@@ -695,7 +694,7 @@ function initBoot() {
   });
 
   // The page behind the screen, kept out of reach until access is granted
-  const site = document.querySelectorAll('body > :not(#mfd):not(.boot-backdrop):not(script)');
+  const site = document.querySelectorAll('body > :not(#mfd):not(script)');
 
   const SHELL = 'PS C:\\CREW> ';
   const COMMAND = 'Open-CrewRecord -Name "Ashton Lee"';
@@ -936,15 +935,14 @@ function initBoot() {
     enterSite();
   }
 
-  // Grow the display to the window's edges while the terminal fades into the site (CSS
-  // .entering), then hand over. The access screen stays in the page, hidden, for RESET.
+  // Fade the terminal into the site and light up the labels (CSS .entering), then hand over.
+  // The access screen stays in the page, hidden, for RESET.
   function enterSite() {
     clearInterval(metTimer);
     const finish = () => {
       planet.stop();
       root.classList.remove('booting');
       frame.classList.remove('entering', 'awaiting');
-      backdrop.classList.remove('entering');
       site.forEach((el) => { el.inert = false; });
     };
     if (reducedMotion) {
@@ -952,34 +950,25 @@ function initBoot() {
       return;
     }
     frame.classList.add('entering');
-    backdrop.classList.add('entering');
-    setTimeout(finish, 2600);
+    setTimeout(finish, 1900);
   }
 
-  // RESET on the site: the screen goes dark, the display shrinks back to its size on the
-  // access screen (CSS .shrinking), then the CRT powers on and the sequence runs again
+  // RESET on the site: the screen goes dark, then the CRT powers on and the sequence runs again
   function reset() {
     if (root.classList.contains('booting')) return;
     try { sessionStorage.removeItem('space-access'); } catch (e) { /* storage blocked: it always shows anyway */ }
     const goBack = () => {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      frame.classList.add('rebooted');   // no fade-in this time, the display is already there
       root.classList.add('booting');
+      frame.classList.remove('powering-off');
+      begin();
     };
     if (reducedMotion) {
       goBack();
-      begin();
       return;
     }
     frame.classList.add('powering-off');
-    setTimeout(() => {
-      frame.classList.add('shrinking');
-      goBack();
-      setTimeout(() => {
-        frame.classList.remove('shrinking', 'powering-off');
-        begin();
-      }, 950);
-    }, 450);
+    setTimeout(goBack, 450);
   }
 
   form.addEventListener('submit', (event) => {

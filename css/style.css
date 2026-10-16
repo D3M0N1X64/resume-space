@@ -1282,7 +1282,6 @@ html::-webkit-scrollbar { display: none; }
 }
 
 /* ----- The access screen (only while <html> has "booting") ----- */
-.boot-backdrop,
 .crt,
 .when-boot { display: none; }
 
@@ -1291,47 +1290,8 @@ html.booting body {
   overflow: hidden;
 }
 
-html.booting .boot-backdrop {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: 899;
-  background: radial-gradient(ellipse at 50% 40%, #1b2029 0%, #0b0e13 60%, #040507 100%);
-}
-
-/* Once the display fills the window, the cover over the page fades with the terminal */
-html.booting .boot-backdrop.entering {
-  opacity: 0;
-  transition: opacity 0.45s ease-in 0.85s;
-}
-
-/* The display sits centred and large, then grows to the window's edges */
-html.booting .mfd {
-  inset: max(16px, (100vh - 900px) / 2) max(16px, (100vw - 1240px) / 2);
-  border-radius: 18px;
-  box-shadow: 0 0 0 1px #0b0c0e, 0 40px 100px rgba(0, 0, 0, 0.7);
-}
-
-/* Fades in on first load only; after RESET the display is already there */
-html.booting .mfd:not(.rebooted) {
-  animation: mfd-in 0.5s ease-out both;
-}
-
-/* RESET: the dark display shrinks back to its size on the access screen,
-   and the CRT stays off until it gets there */
-html.booting .mfd.shrinking {
-  transition: inset 0.9s cubic-bezier(0.6, 0, 0.25, 1), border-radius 0.9s, box-shadow 0.9s;
-}
-
-html.booting .mfd.shrinking .crt { display: none; }
-
-html.booting .mfd.entering {
-  inset: 0;
-  border-radius: 0;
-  box-shadow: none;
-  transition: inset 0.9s cubic-bezier(0.6, 0, 0.25, 1), border-radius 0.9s, box-shadow 0.9s;
-}
-
+/* The display fills the window throughout; getting in just switches the screen from
+   the terminal to the site (.entering) */
 html.booting .crt { display: block; }
 html.booting .when-boot { display: flex; }
 
@@ -1356,7 +1316,7 @@ html.booting .mfd.entering .mfd-labels {
   border-color: var(--panel-border);
   color: var(--muted);
   text-shadow: none;
-  transition: background-color 0.4s 0.9s, border-color 0.4s 0.9s, color 0.4s 0.9s, text-shadow 0.4s 0.9s;
+  transition: background-color 0.4s 0.3s, border-color 0.4s 0.3s, color 0.4s 0.3s, text-shadow 0.4s 0.3s;
 }
 
 html.booting .mfd.entering .when-boot {
@@ -1369,7 +1329,7 @@ html.booting .mfd.entering .when-site,
 html.booting .mfd.entering .mfd-scroll {
   visibility: visible;
   opacity: 1;
-  transition: opacity 0.4s ease calc(1.1s + var(--i, 0) * 60ms);
+  transition: opacity 0.4s ease calc(0.5s + var(--i, 0) * 60ms);
 }
 
 .crt {
@@ -1390,7 +1350,7 @@ html.booting .mfd.entering .mfd-scroll {
 
 html.booting .mfd.entering .crt {
   opacity: 0;
-  transition: opacity 0.45s ease-in 0.85s;
+  transition: opacity 0.5s ease-in 0.1s;
 }
 
 /* Scanlines, then the curve of the tube: a soft catch-light where the bulge of the glass
@@ -1512,11 +1472,6 @@ html.booting .mfd.entering .crt {
   animation: crt-roll 7s linear infinite;
 }
 
-@keyframes mfd-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
 /* CRT power-on: a bright line that opens out into the picture */
 @keyframes crt-on {
   0%   { transform: scale(1, 0.004); opacity: 0.3; filter: brightness(3); }
@@ -1581,7 +1536,6 @@ html.booting .mfd.entering .crt {
   .lbl .long { display: none; }
   .lbl .short { display: inline; }
   .crt-content { padding-left: 12px; padding-right: 12px; }
-  html.booting .mfd { inset: 10px; }
 }
 
 /* ---------- Easter eggs (js/eggs.js) ---------- */
@@ -2080,7 +2034,6 @@ html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #
   }
 
   .mfd,
-  .boot-backdrop,
   .scene-photo,
   .starfield,
   .sky-tint,
