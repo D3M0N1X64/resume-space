@@ -805,8 +805,8 @@ function initBoot() {
 
   async function startUp(thisRun) {
     const current = () => thisRun === run && mode !== 'done';
-    flicker();         // the tube flickers as it powers on...
-    await wait(800);   // ...and settles before the text starts
+    flicker();          // the tube flickers as it powers on...
+    await wait(1100);   // ...and settles before the text starts
     if (!current()) return;
     line('MEDS MFD 2 · BOOT ROM 4.07');
     line('LOADING FLIGHT SOFTWARE');

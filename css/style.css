@@ -1483,19 +1483,25 @@ html.booting .mfd.entering .crt {
 
 /* The tube settling after power-on: a few dips in brightness, then steady */
 .crt.flicker {
-  animation: crt-flicker 0.7s linear;
+  animation: crt-flicker 1.1s linear;
 }
 
 @keyframes crt-flicker {
   0%   { filter: brightness(1); }
-  6%   { filter: brightness(0.35); }
-  10%  { filter: brightness(1.25); }
-  18%  { filter: brightness(0.8); }
-  24%  { filter: brightness(1); }
-  41%  { filter: brightness(0.55); }
-  45%  { filter: brightness(1.15); }
-  62%  { filter: brightness(0.9); }
-  66%  { filter: brightness(1); }
+  4%   { filter: brightness(0.2); }
+  8%   { filter: brightness(1.45); }
+  13%  { filter: brightness(0.5); }
+  17%  { filter: brightness(1.2); }
+  24%  { filter: brightness(0.7); }
+  28%  { filter: brightness(1); }
+  39%  { filter: brightness(0.3); }
+  43%  { filter: brightness(1.35); }
+  50%  { filter: brightness(0.75); }
+  55%  { filter: brightness(1.1); }
+  66%  { filter: brightness(0.6); }
+  70%  { filter: brightness(1.15); }
+  80%  { filter: brightness(0.9); }
+  85%  { filter: brightness(1); }
   100% { filter: brightness(1); }
 }
 
