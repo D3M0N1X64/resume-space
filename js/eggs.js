@@ -90,6 +90,17 @@ function hideToast() {
   setTimeout(nextToast, 300);
 }
 
+// Take down a message of one kind (e.g. the access screen's skip hint), shown or queued
+function dismissToast(kind) {
+  for (let i = toastQueue.length - 1; i >= 0; i--) {
+    if (toastQueue[i].kind === kind) toastQueue.splice(i, 1);
+  }
+  if (toastCurrent && toastCurrent.kind === kind) {
+    clearTimeout(toastTimer);
+    hideToast();
+  }
+}
+
 // ---------- Hidden terminal commands ----------
 // Not listed in "help"; the achievements list hints at them. print(text, type) adds a line,
 // append(node) adds an element. Each command gets the words typed after it.

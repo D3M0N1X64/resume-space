@@ -992,6 +992,7 @@ function initBoot() {
   // The access screen stays in the page, hidden, for RESET.
   function enterSite() {
     clearInterval(metTimer);
+    dismissToast('hint');   // the skip hint belongs to the access screen
     const finish = () => {
       planet.stop();
       root.classList.remove('booting');
