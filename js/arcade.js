@@ -124,7 +124,7 @@ function createArcade(onExit) {
   let enemies = [];
   let particles = [];
   let fireCooldown = 0;
-  let phos = '#7dffa5';
+  let phos = '#6ad4ff';
 
   const input = { left: false, right: false, fire: false, target: null };
 
@@ -196,7 +196,7 @@ function createArcade(onExit) {
   }
 
   function readColour() {
-    phos = getComputedStyle(root).getPropertyValue('--phos').trim() || '#7dffa5';
+    phos = getComputedStyle(root).getPropertyValue('--phos').trim() || '#6ad4ff';
   }
 
   // ----- Drawing helpers -----

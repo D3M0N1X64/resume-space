@@ -36,7 +36,7 @@
   <!-- The whole site is shown on the screen of a cockpit multi-function display (MFD).
        The labels on the screen's edges are the real links and buttons; each key in the bezel
        (data-key) presses the label beside it. While the head script's "booting" class is on,
-       the screen shows a green-phosphor terminal asking for access instead: main.js runs it,
+       the screen shows a blue-phosphor terminal asking for access instead: main.js runs it,
        then switches the screen over to the site. -->
   <div class="mfd" id="mfd">
 
@@ -129,6 +129,8 @@
       <button type="button" tabindex="-1" data-step="1"></button><button type="button" tabindex="-1" data-step="-1"></button>
     </div>
     <button type="button" class="mfd-caution" tabindex="-1" aria-hidden="true">CAUTION</button>
+    <!-- The maker's model number, etched into the top-right of the bezel -->
+    <span class="mfd-model" aria-hidden="true">D3M0N1X</span>
     <span class="mfd-plate mfd-plate-left" aria-hidden="true">MFD 2</span>
     <button type="button" class="mfd-plate mfd-plate-right mfd-power" tabindex="-1" aria-hidden="true"><span class="mfd-lamp"></span>PWR</button>
 
@@ -293,60 +295,59 @@
       <p class="section-kicker reveal">02 / Skills</p>
       <h2 class="section-title reveal">Skills</h2>
 
-      <!-- Set each bar with data-level (0–100) and keep aria-valuenow and the label in step -->
       <div class="skill-grid">
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 01</span>
           <h3>Networking &amp; IT</h3>
           <p>Keeping networks, systems and the people using them healthy, from the rack to the help desk.</p>
-          <div class="meter" data-level="90" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="Expert">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Expert</span>
         </article>
 
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 02</span>
           <h3>Problem Solving</h3>
           <p>Methodical troubleshooting: reproduce it, isolate it, fix it, then write down what happened.</p>
-          <div class="meter" data-level="90" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-valuetext="Expert">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Expert</span>
         </article>
 
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 03</span>
           <h3>Programming</h3>
           <p>Writing clear, working code to automate the boring parts and build useful tools.</p>
-          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Advanced</span>
         </article>
 
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 04</span>
           <h3>Software Development</h3>
           <p>Taking an idea from requirements through design, build, testing and release.</p>
-          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Advanced</span>
         </article>
 
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 05</span>
           <h3>Databases</h3>
           <p>Designing, querying and maintaining relational data that stays consistent and fast.</p>
-          <div class="meter" data-level="75" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="Advanced">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Advanced</span>
         </article>
 
         <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 06</span>
           <h3>Project Planning</h3>
           <p>Scoping the work, setting milestones and keeping everyone informed until it ships.</p>
-          <div class="meter" data-level="80" role="meter" aria-label="Proficiency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-valuetext="Advanced">
-            <div class="meter-fill"></div>
-          </div>
-          <span class="meter-label">Advanced</span>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 07</span>
+          <h3>Technical Support</h3>
+          <p>Eight years of helping people on the phone, remotely and in person, and explaining the fix in plain language.</p>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 08</span>
+          <h3>Hardware &amp; Field Service</h3>
+          <p>Diagnosing, repairing and installing equipment, from campus workstations to on-site customer setups.</p>
+        </article>
+
+        <article class="panel skill-card reveal">
+          <span class="skill-code" aria-hidden="true">SYS 09</span>
+          <h3>Web Development</h3>
+          <p>Building fast, accessible pages in plain HTML, CSS and JavaScript, like this one, versioned with Git.</p>
         </article>
       </div>
     </section>
@@ -457,32 +458,56 @@
 
       <div class="accolade-grid">
         <article class="panel accolade-card reveal">
-          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <circle cx="12" cy="9" r="5.5"/><path d="M8.8 13.5 7 21.5l5-2.6 5 2.6-1.8-8"/><path d="m12 6.5.8 1.7 1.8.2-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.2z"/>
+          <svg class="patch" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs><path id="patch-eagle" d="M 17 60 A 43 43 0 0 1 103 60"/></defs>
+            <circle class="patch-edge" cx="60" cy="60" r="57"/>
+            <circle class="patch-ring" cx="60" cy="60" r="51"/>
+            <circle class="patch-ring" cx="60" cy="60" r="34"/>
+            <text class="patch-text"><textPath href="#patch-eagle" startOffset="50%" text-anchor="middle">EAGLE SCOUT</textPath></text>
+            <path class="patch-star" d="M15 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3zM105 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z"/>
+            <g class="patch-icon" transform="translate(42 42) scale(1.5)"><circle cx="12" cy="9" r="5.5"/><path d="M8.8 13.5 7 21.5l5-2.6 5 2.6-1.8-8"/><path d="m12 6.5.8 1.7 1.8.2-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.2z"/></g>
           </svg>
           <h3>Eagle Scout</h3>
           <p>Earned Scouting's highest rank through leadership, service and a community project.</p>
         </article>
 
         <article class="panel accolade-card reveal">
-          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 7 18.5z"/><path d="M10 13.5h4M12 11.5v4"/>
+          <svg class="patch" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs><path id="patch-cloud" d="M 17 60 A 43 43 0 0 1 103 60"/></defs>
+            <circle class="patch-edge" cx="60" cy="60" r="57"/>
+            <circle class="patch-ring" cx="60" cy="60" r="51"/>
+            <circle class="patch-ring" cx="60" cy="60" r="34"/>
+            <text class="patch-text"><textPath href="#patch-cloud" startOffset="50%" text-anchor="middle">AI &amp; CLOUD</textPath></text>
+            <path class="patch-star" d="M15 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3zM105 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z"/>
+            <g class="patch-icon" transform="translate(42 42) scale(1.5)"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 7 18.5z"/><path d="M10 13.5h4M12 11.5v4"/></g>
           </svg>
           <h3>AI &amp; Cloud Conferences</h3>
           <p>Attended GAINS and other conferences to deepen my knowledge of AI and cloud development.</p>
         </article>
 
         <article class="panel accolade-card reveal">
-          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 4.5V8M9 12.5h.01M15 12.5h.01M9.5 16h5M3 12v3M21 12v3"/><circle cx="12" cy="3.5" r="1"/>
+          <svg class="patch" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs><path id="patch-robotics" d="M 17 60 A 43 43 0 0 1 103 60"/></defs>
+            <circle class="patch-edge" cx="60" cy="60" r="57"/>
+            <circle class="patch-ring" cx="60" cy="60" r="51"/>
+            <circle class="patch-ring" cx="60" cy="60" r="34"/>
+            <text class="patch-text"><textPath href="#patch-robotics" startOffset="50%" text-anchor="middle">ROBOTICS TEAM</textPath></text>
+            <path class="patch-star" d="M15 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3zM105 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z"/>
+            <g class="patch-icon" transform="translate(42 42) scale(1.5)"><rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 4.5V8M9 12.5h.01M15 12.5h.01M9.5 16h5M3 12v3M21 12v3"/><circle cx="12" cy="3.5" r="1"/></g>
           </svg>
           <h3>Robotics Competitions</h3>
           <p>Competed on robotics teams, collaborating to design, build and program under deadline.</p>
         </article>
 
         <article class="panel accolade-card reveal">
-          <svg class="accolade-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="m10 6.5 3.5-3.5 3.5 3.5-3.5 3.5zM7 9.5l3.5 3.5L7 16.5 3.5 13z"/><path d="m10.5 10 3 3M13.5 10l-3 3"/><path d="M15 15.5a3.5 3.5 0 0 0 3.5-3.5M15 19a7 7 0 0 0 7-7"/>
+          <svg class="patch" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs><path id="patch-smallsat" d="M 17 60 A 43 43 0 0 1 103 60"/></defs>
+            <circle class="patch-edge" cx="60" cy="60" r="57"/>
+            <circle class="patch-ring" cx="60" cy="60" r="51"/>
+            <circle class="patch-ring" cx="60" cy="60" r="34"/>
+            <text class="patch-text"><textPath href="#patch-smallsat" startOffset="50%" text-anchor="middle">AUBURN SMALLSAT</textPath></text>
+            <path class="patch-star" d="M15 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3zM105 72l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z"/>
+            <g class="patch-icon" transform="translate(42 42) scale(1.5)"><path d="m10 6.5 3.5-3.5 3.5 3.5-3.5 3.5zM7 9.5l3.5 3.5L7 16.5 3.5 13z"/><path d="m10.5 10 3 3M13.5 10l-3 3"/><path d="M15 15.5a3.5 3.5 0 0 0 3.5-3.5M15 19a7 7 0 0 0 7-7"/></g>
           </svg>
           <h3>Auburn Small Satellite Program</h3>
           <p>Worked with Auburn University's student CubeSat program, which designs and builds small satellites.</p>
@@ -498,8 +523,8 @@
 
       <div class="terminal reveal">
         <div class="terminal-bar">
-          <span class="terminal-dots" aria-hidden="true"><span></span><span></span><span></span></span>
-          <span class="terminal-title">guest@mission-control: ~</span>
+          <span class="terminal-title">CREW SHELL · guest@mission-control</span>
+          <span class="terminal-link" aria-hidden="true"><span class="terminal-lamp"></span>LINK</span>
         </div>
         <div class="terminal-output" id="terminal-output" aria-live="polite">
           <p class="t-info">Connection established. Welcome aboard.</p>
@@ -540,7 +565,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>&copy; <span id="year"></span> Ashton Lee</p>
+    <p><span class="footer-code">END OF RECORD · MFD 2</span> &copy; <span id="year"></span> Ashton Lee</p>
   </footer>
 
   <script src="js/eggs.js"></script>

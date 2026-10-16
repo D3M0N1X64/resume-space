@@ -193,19 +193,12 @@ function initClock() {
   setInterval(tick, 1000);
 }
 
-// ---------- Fade-in on scroll + filling skill gauges ----------
+// ---------- Fade-in on scroll ----------
 function initScrollReveal() {
-  // Give each gauge its target width from data-level
-  document.querySelectorAll('.meter').forEach((bar) => {
-    bar.style.setProperty('--level', bar.dataset.level + '%');
-  });
-
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       entry.target.classList.add('visible');
-      const meter = entry.target.querySelector('.meter');
-      if (meter) meter.classList.add('filled');
       observer.unobserve(entry.target); // animate only once
     });
   }, { threshold: 0.15 });

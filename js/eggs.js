@@ -242,7 +242,7 @@ function initEasterEggs() {
     const amber = root.dataset.phosphor !== 'amber';
     if (amber) root.dataset.phosphor = 'amber';
     else delete root.dataset.phosphor;
-    showToast(amber ? 'AMBER PHOSPHOR · NIGHT OPS' : 'GREEN PHOSPHOR · DAY OPS');
+    showToast(amber ? 'AMBER PHOSPHOR · NIGHT OPS' : 'BLUE PHOSPHOR · STANDARD OPS');
     achievements.unlock('konami');
   });
 

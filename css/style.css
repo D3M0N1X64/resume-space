@@ -23,7 +23,7 @@
 
   --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --font-mono: 'B612 Mono', 'JetBrains Mono', Consolas, monospace;   /* Airbus's cockpit display font */
   --radius: 10px;
   --max-width: 1100px;
 }
@@ -111,7 +111,7 @@ code {
   color: #04121c;
   background: var(--accent);
   border: 1px solid var(--accent);
-  border-radius: 6px;
+  border-radius: 3px;
   padding: 0.75em 1.4em;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
@@ -455,12 +455,29 @@ code {
 }
 
 .section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 0.5rem;
+}
+
+.section-kicker::before {
+  content: '';
+  width: 4px;
+  height: 0.9em;
+  background: var(--accent);
+}
+
+.section-kicker::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, transparent), transparent);
 }
 
 .section-title {
@@ -475,11 +492,23 @@ code {
   margin: -1.2rem 0 2rem;
 }
 
-/* Shared panel look */
+/* Shared panel look: an instrument panel, square-cornered, with bracket marks at the corners */
 .panel {
-  background: var(--panel);
+  --tick: color-mix(in srgb, var(--accent) 60%, transparent);
+  position: relative;
+  background:
+    linear-gradient(var(--tick) 0 0) left top / 12px 1px,
+    linear-gradient(var(--tick) 0 0) left top / 1px 12px,
+    linear-gradient(var(--tick) 0 0) right top / 12px 1px,
+    linear-gradient(var(--tick) 0 0) right top / 1px 12px,
+    linear-gradient(var(--tick) 0 0) left bottom / 12px 1px,
+    linear-gradient(var(--tick) 0 0) left bottom / 1px 12px,
+    linear-gradient(var(--tick) 0 0) right bottom / 12px 1px,
+    linear-gradient(var(--tick) 0 0) right bottom / 1px 12px,
+    var(--panel);
+  background-repeat: no-repeat;
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
+  border-radius: 3px;
   box-shadow: var(--shadow);
 }
 
@@ -555,41 +584,24 @@ code {
   margin-bottom: 0.35rem;
 }
 
+.skill-card h3 { padding-right: 3.5rem; }
+
 .skill-card p {
   color: var(--muted);
   font-size: 0.97rem;
-  margin: 0 0 1.2rem;
+  margin: 0;
 }
 
-/* A segmented gauge: ten cells, lit up to the level */
-.meter {
-  --cells: repeating-linear-gradient(90deg, #000 0 calc(10% - 3px), transparent calc(10% - 3px) 10%);
-  position: relative;
-  height: 8px;
-  background: var(--track);
-  -webkit-mask-image: var(--cells);
-  mask-image: var(--cells);
-}
-
-.meter-fill {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #fff));
-  transition: width 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.meter.filled .meter-fill {
-  width: var(--level);
-}
-
-.meter-label {
-  display: block;
-  margin-top: 0.5rem;
+/* A system code in the corner of each card, like a panel's label plate */
+.skill-code {
+  position: absolute;
+  top: 1rem;
+  right: 1.1rem;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  opacity: 0.7;
 }
 
 /* ---------- Experience: a mission timeline ---------- */
@@ -687,12 +699,14 @@ code {
 
 .tags li {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.25em 0.7em;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.3em 0.65em;
   color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 4px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 2px;
 }
 
 /* ---------- Education ---------- */
@@ -732,19 +746,50 @@ code {
   border-color: var(--accent);
 }
 
-.accolade-icon {
-  width: 2.6rem;
-  height: 2.6rem;
-  padding: 0.5rem;
-  margin-bottom: 0.9rem;
+.accolade-card { text-align: center; }
+
+/* A round mission patch: a stitched edge, lettering round the top, the emblem in the middle */
+.patch {
+  display: block;
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 1rem;
+  overflow: visible;
+}
+
+.patch-edge {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.patch-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 55%, transparent);
+  stroke-width: 1;
+}
+
+.patch-ring:first-of-type { stroke-dasharray: 2 3; }   /* the stitching */
+
+.patch-text {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  fill: var(--amber);
+}
+
+.patch-star { fill: var(--amber); }
+
+.patch-icon {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 1.6;
+  stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  background: var(--accent-soft);
-  border-radius: 8px;
 }
+
+.accolade-card:hover .patch-edge { fill: color-mix(in srgb, var(--accent) 18%, transparent); }
 
 .accolade-card h3 {
   font-size: 1.08rem;
@@ -762,43 +807,49 @@ code {
   max-width: 820px;
   background: #050912;
   border: 1px solid rgba(120, 170, 255, 0.2);
-  border-radius: var(--radius);
+  border-radius: 3px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 0 40px rgba(76, 201, 240, 0.04);
 }
 
 .terminal-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.8rem;
   padding: 0.6rem 1rem;
   background: #0b1424;
   border-bottom: 1px solid rgba(120, 170, 255, 0.14);
 }
 
-.terminal-dots {
-  display: inline-flex;
-  gap: 0.4rem;
-}
-
-.terminal-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #2a3a55;
-}
-
-.terminal-title {
+.terminal-title,
+.terminal-link {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
   color: #8ea3bf;
+}
+
+.terminal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #4cc9f0;
+}
+
+.terminal-lamp {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4cc9f0;
+  box-shadow: 0 0 6px #4cc9f0;
 }
 
 .terminal-output {
   font-family: var(--font-mono);
   font-size: 0.9rem;
   color: #c9d7ea;
-  height: 300px;
+  height: 260px;
   overflow-y: auto;
   padding: 1rem 1.2rem;
   scrollbar-width: thin;
@@ -826,7 +877,7 @@ code {
 
 .t-prompt {
   font-family: var(--font-mono);
-  color: #3ddc97;
+  color: #4cc9f0;
 }
 
 .terminal-input {
@@ -893,7 +944,7 @@ code {
   width: 44px;
   height: 44px;
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
+  border-radius: 3px;
   color: var(--muted);
   transition: color 0.2s, border-color 0.2s, background-color 0.2s;
 }
@@ -917,8 +968,26 @@ code {
   padding: 2rem 1rem;
   border-top: 1px solid var(--panel-border);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
   color: var(--muted);
+}
+
+.footer-code {
+  margin-right: 0.9rem;
+  padding-right: 0.9rem;
+  border-right: 1px solid var(--panel-border);
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .footer-code {
+    display: block;
+    margin: 0 0 0.4rem;
+    padding: 0;
+    border: 0;
+  }
 }
 
 /* ---------- Scroll reveal ---------- */
@@ -949,12 +1018,14 @@ code {
   --lb-side: 88px;
   --chrome-y: calc(var(--bz-top) + var(--lb-top) + var(--lb-bottom) + var(--bz-bottom));
   --bezel: #1f2125;
-  --phos: #7dffa5;                       /* green phosphor, for the access screen */
-  --phos-dim: rgba(125, 255, 165, 0.45);
-  --phos-line: rgba(125, 255, 165, 0.22);
-  --phos-glow: 0 0 2px rgba(90, 255, 150, 0.55), 0 0 10px rgba(90, 255, 150, 0.18);
-  --phos-ink: #021a0b;                   /* dark text on a lit phosphor block */
+  --phos: #6ad4ff;                       /* blue phosphor, matching the site's cyan */
+  --phos-dim: rgba(106, 212, 255, 0.45);
+  --phos-line: rgba(106, 212, 255, 0.22);
+  --phos-glow: 0 0 2px rgba(76, 201, 240, 0.55), 0 0 10px rgba(76, 201, 240, 0.18);
+  --phos-ink: #021622;                   /* dark text on a lit phosphor block */
   /* B612 was designed by Airbus for cockpit displays */
+  /* Brushed-metal grain: noise stretched far sideways, so it reads as fine horizontal streaks */
+  --brushed: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='60'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 1.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.7 0 0 0 0.15 0.7 0 0 0 0.15 0.7 0 0 0 0.15 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
   --font-mfd: 'B612 Mono', var(--font-mono);
   --font-panel: 'B612', var(--font-display);
   /* Powder-coat grain: SVG noise lit from the top left, so the paint has a fine, bumpy sheen.
@@ -1001,9 +1072,16 @@ code {
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: var(--powder) 0 0 / 240px 240px;
+  /* Brushed metal: fine horizontal grain (noise stretched sideways), a few longer scratches,
+     and a soft sheen across the top and bottom where the light catches the brushing */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 7%,
+      rgba(255, 255, 255, 0) 93%, rgba(255, 255, 255, 0.14) 100%),
+    var(--brushed) 0 0 / 600px 40px,
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 2px, transparent 2px 3px),
+    var(--powder) 0 0 / 240px 240px;
   mix-blend-mode: soft-light;
-  opacity: 0.45;
+  opacity: 0.55;
   -webkit-mask:
     linear-gradient(#000 0 0),
     linear-gradient(#000 0 0) var(--bz-side) var(--bz-top) / calc(100% - 2 * var(--bz-side)) calc(100% - var(--bz-top) - var(--bz-bottom)) no-repeat;
@@ -1339,7 +1417,7 @@ html.booting .mfd.entering .mfd-scroll {
   z-index: 1;
   overflow: hidden;
   border-radius: 14px;
-  background: radial-gradient(ellipse at center, #06170c 0%, #031008 60%, #010402 100%);
+  background: radial-gradient(ellipse at center, #051421 0%, #030c16 60%, #01040a 100%);
   color: var(--phos);
   font-family: var(--font-mfd);
   font-size: clamp(12px, 0.45vw + 9px, 16px);
@@ -1363,7 +1441,7 @@ html.booting .mfd.entering .crt {
   pointer-events: none;
   background:
     repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse 60% 45% at 38% 30%, rgba(190, 255, 215, 0.035), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 38% 30%, rgba(200, 235, 255, 0.035), transparent 70%),
     radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 85%, rgba(0, 0, 0, 0.75) 100%);
 }
 
@@ -1398,7 +1476,7 @@ html.booting .mfd.entering .crt {
   font-size: 8px;
   line-height: 1;
   letter-spacing: 0;
-  text-shadow: 0 0 3px rgba(90, 255, 150, 0.45);
+  text-shadow: 0 0 3px rgba(76, 201, 240, 0.45);
 }
 
 .crt-planet figcaption {
@@ -1441,9 +1519,9 @@ html.booting .mfd.entering .crt {
 .crt-log .b-inverse span {
   padding: 0 0.5em;
   background: var(--phos);
-  color: #021a0b;
+  color: var(--phos-ink);
   text-shadow: none;
-  box-shadow: 0 0 12px rgba(90, 255, 150, 0.45);
+  box-shadow: 0 0 12px rgba(76, 201, 240, 0.45);
 }
 
 .crt-prompt-row label { white-space: pre-wrap; }
@@ -1469,7 +1547,7 @@ html.booting .mfd.entering .crt {
   top: -30%;
   height: 30%;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(125, 255, 165, 0.035), transparent);
+  background: linear-gradient(180deg, transparent, rgba(106, 212, 255, 0.035), transparent);
   animation: crt-roll 7s linear infinite;
 }
 
@@ -1628,6 +1706,24 @@ html.tuned .crt {
   cursor: pointer;
 }
 
+/* Model number etched into the metal: cut in, so it's darker than the face with a thin
+   highlight on its lower edge, and not backlit like the panel markings */
+.mfd-model {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--bz-top) / 2);
+  right: calc(var(--bz-side) + var(--lb-side) / 2);
+  transform: translate(50%, -50%);
+  font-family: var(--font-panel);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: #121316;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.16), 0 -1px 0 rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .mfd-caution.lit {
   background: linear-gradient(180deg, #ffc66b, #f59a1c);
   color: #3a2200;
@@ -1695,8 +1791,8 @@ html.tuned .crt {
   top: 50%;
   height: 2px;
   margin-top: -1px;
-  background: #eafff2;
-  box-shadow: 0 0 10px 2px rgba(200, 255, 220, 0.8);
+  background: #eaf8ff;
+  box-shadow: 0 0 10px 2px rgba(200, 235, 255, 0.8);
   opacity: 0;
 }
 
@@ -1752,7 +1848,7 @@ html.tuned .crt {
   padding: 16px 22px;
   border: 1px solid var(--phos);
   background: #000;
-  box-shadow: 0 0 12px rgba(90, 255, 150, 0.25);
+  box-shadow: 0 0 12px rgba(76, 201, 240, 0.25);
 }
 
 .selftest-title {
@@ -1935,7 +2031,72 @@ html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #
 
 /* The caution lamp lives with the other wide-screen bezel parts */
 @media (max-width: 999px) {
-  .mfd-caution { display: none; }
+  .mfd-caution,
+  .mfd-model { display: none; }
+}
+
+/* ---------- Panel lighting ---------- */
+/* Like a jet's night panel lighting: light leaks around the edge of each key and glows on
+   the bezel, and the engraved markings are lit. It follows the phosphor colour (blue, or
+   amber after the Konami code) and is turned down in day mode, as a pilot would. */
+:root {
+  --panel-edge: color-mix(in srgb, var(--phos) 60%, transparent);
+  --panel-halo: color-mix(in srgb, var(--phos) 26%, transparent);
+  --panel-hot: color-mix(in srgb, var(--phos) 55%, transparent);
+  --panel-text: color-mix(in srgb, var(--phos) 70%, #9ea4ad);
+}
+
+:root[data-theme="light"] {
+  --panel-edge: color-mix(in srgb, var(--phos) 28%, transparent);
+  --panel-halo: color-mix(in srgb, var(--phos) 8%, transparent);
+  --panel-hot: color-mix(in srgb, var(--phos) 35%, transparent);
+  --panel-text: #9ea4ad;
+}
+
+.osb {
+  box-shadow:
+    0 0 0 1px var(--panel-edge),     /* light through the gap round the key */
+    0 0 7px 2px var(--panel-halo),   /* spilling onto the bezel */
+    0 0 0 4px #27292d,
+    0 2px 0 4px #141518,
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.15s;
+}
+
+.osb:hover {
+  box-shadow:
+    0 0 0 1px var(--panel-hot),
+    0 0 9px 3px var(--panel-halo),
+    0 0 0 4px #27292d,
+    0 2px 0 4px #141518,
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* A press flares the light as the key sinks */
+.osb:active {
+  box-shadow:
+    0 0 0 1px var(--phos),
+    0 0 12px 4px var(--panel-hot),
+    0 0 0 4px #27292d,
+    0 1px 0 4px #141518,
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.rocker {
+  box-shadow:
+    0 0 0 1px var(--panel-edge),
+    0 0 6px 2px var(--panel-halo),
+    0 0 0 3px #26282c,
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Lit engravings */
+.mfd-plate,
+.rocker::after {
+  color: var(--panel-text);
+  text-shadow: 0 0 5px var(--panel-halo), 0 -1px 0 rgba(0, 0, 0, 0.8);
 }
 
 /* ---------- Arcade: LUNAR DEFENSE (js/arcade.js) ---------- */
@@ -1947,7 +2108,7 @@ html[data-phosphor="amber"][data-theme="light"] .mfd-scroll span { background: #
   display: none;
   overflow: hidden;
   border-radius: 14px 14px 0 0;
-  background: radial-gradient(ellipse at center, #04140a 0%, #020b05 60%, #010302 100%);
+  background: radial-gradient(ellipse at center, #04111c 0%, #020a12 60%, #010307 100%);
   pointer-events: auto;
   touch-action: none;
   user-select: none;
@@ -2126,8 +2287,8 @@ html.gaming body {
   .section-kicker,
   #terminal,
   #contact,
-  .meter,
-  .accolade-icon,
+  .patch,
+  .skill-code,
   .site-footer {
     display: none !important;
   }
@@ -2155,6 +2316,7 @@ html.gaming body {
   .section-title { font-size: 16pt; margin-bottom: 0.5rem; }
 
   .panel {
+    background: none;
     box-shadow: none;
     border: none;
     padding: 0.3rem 0 !important;
