@@ -953,6 +953,7 @@ code {
   --phos-dim: rgba(125, 255, 165, 0.45);
   --phos-line: rgba(125, 255, 165, 0.22);
   --phos-glow: 0 0 2px rgba(90, 255, 150, 0.55), 0 0 10px rgba(90, 255, 150, 0.18);
+  --phos-ink: #021a0b;                   /* dark text on a lit phosphor block */
   /* B612 was designed by Airbus for cockpit displays */
   --font-mfd: 'B612 Mono', var(--font-mono);
   --font-panel: 'B612', var(--font-display);
@@ -1759,40 +1760,50 @@ html.tuned .crt {
   font: inherit;
 }
 
-/* Short messages near the top of the screen */
+/* Short messages: an inverse-video phosphor block at the bottom of the screen, like the
+   access screen's ACCESS GRANTED banner. It flashes as it appears and blinks off when done. */
 .mfd-toast {
   position: absolute;
   z-index: 6;
-  top: calc(var(--bz-top) + var(--lb-top) + 14px);
+  bottom: calc(var(--bz-bottom) + var(--lb-bottom) + 14px);
   left: 50%;
   max-width: calc(100% - 2 * var(--bz-side) - 32px);
-  padding: 8px 14px;
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--accent);
+  padding: 4px 12px;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px),
+    var(--phos);
+  color: var(--phos-ink);
   font-family: var(--font-mfd);
-  font-size: 11px;
-  line-height: 1.4;
-  letter-spacing: 0.1em;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.08em;
   text-align: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 14px var(--phos-dim);
   opacity: 0;
-  transform: translate(-50%, -6px);
-  transition: opacity 0.25s, transform 0.25s;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
 .mfd-toast.show {
   opacity: 1;
-  transform: translate(-50%, 0);
+  animation: toast-flash 0.9s steps(1);
 }
 
-html.booting .mfd-toast {
-  border-color: var(--phos);
-  background: rgba(1, 8, 4, 0.92);
-  color: var(--phos);
-  text-shadow: var(--phos-glow);
+@keyframes toast-flash {
+  0%   { opacity: 1; }
+  12%  { opacity: 0; }
+  24%  { opacity: 1; }
+  36%  { opacity: 0; }
+  48%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .mfd-toast {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
 }
 
 /* Konami code: amber phosphor ("night ops") */
@@ -1801,6 +1812,7 @@ html[data-phosphor="amber"] {
   --phos-dim: rgba(255, 179, 71, 0.45);
   --phos-line: rgba(255, 179, 71, 0.22);
   --phos-glow: 0 0 2px rgba(255, 170, 60, 0.55), 0 0 10px rgba(255, 170, 60, 0.18);
+  --phos-ink: #241400;
 }
 
 html[data-phosphor="amber"] .crt { background: radial-gradient(ellipse at center, #1a1104 0%, #100a02 60%, #040201 100%); }
@@ -1810,17 +1822,14 @@ html[data-phosphor="amber"] .crt-log .b-inverse span { color: #241400; box-shado
 html[data-phosphor="amber"] .selftest-box { box-shadow: 0 0 12px rgba(255, 170, 60, 0.25); }
 
 /* On the site, the screen's labels and markers turn amber too */
-html[data-phosphor="amber"] .mfd-labels,
-html[data-phosphor="amber"] .mfd-toast {
+html[data-phosphor="amber"] .mfd-labels {
   --accent: #ffb347;
   color: rgba(255, 179, 71, 0.75);
 }
 
-html[data-phosphor="amber"] .mfd-toast { color: #ffb347; }
 html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
 
-html[data-phosphor="amber"][data-theme="light"] .mfd-labels,
-html[data-phosphor="amber"][data-theme="light"] .mfd-toast {
+html[data-phosphor="amber"][data-theme="light"] .mfd-labels {
   --accent: #b85f00;
   color: rgba(184, 95, 0, 0.8);
 }
