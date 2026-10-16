@@ -880,7 +880,9 @@ function initBoot() {
 
   async function confirmReply(reply) {
     const choice = reply.toLowerCase();
-    if (choice === '' || choice === 'y' || choice === 'yes') {
+    const name = choice.split(/\s+/)[0];
+    // "open" here means the same as Yes: the record is already the one being opened
+    if (choice === '' || choice === 'y' || choice === 'yes' || name === 'open' || name === 'open-crewrecord') {
       await grant();
     } else if (choice === 'n' || choice === 'no') {
       line('Open-CrewRecord : The operation was canceled by the user.');
