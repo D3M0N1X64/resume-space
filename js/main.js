@@ -188,6 +188,8 @@ function initStarfield() {
 // Nodes spread evenly over a sphere (a Fibonacci lattice), each linked to its nearest
 // neighbours like a network map, turning slowly. Lines and nodes fade toward the back.
 // Cyan normally, amber with the Konami code; it spins up while the mouse is over it.
+// Packets travel the links like live traffic, and a click broadcasts a wave from the
+// nearest node that spreads outward hop by hop until the whole network has lit up.
 function initNetSphere() {
   const canvas = document.querySelector('.net-sphere');
   if (!canvas) return;
@@ -215,6 +217,30 @@ function initNetSphere() {
   });
   const edges = [...links].map((key) => key.split('-').map(Number));
 
+  // Each node's neighbours, for routing packets and spreading a broadcast
+  const neighbours = nodes.map(() => []);
+  for (const [a, b] of edges) {
+    neighbours[a].push(b);
+    neighbours[b].push(a);
+  }
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+  // Packets: { from, to, t: 0-1 along the link, hops left, first: still on its first link }
+  const PACKETS = 7;
+  const HOP_TIME = 0.9;   // seconds to cross one link
+  const packets = [];
+  function launchPacket(t) {
+    const from = Math.floor(Math.random() * COUNT);
+    packets.push({ from, to: pick(neighbours[from]), t, hops: 2 + Math.floor(Math.random() * 4), first: true });
+  }
+  if (!reducedMotion) for (let i = 0; i < PACKETS; i++) launchPacket(Math.random());
+
+  // Broadcast wave: { start (seconds), origin, hops: each node's distance from the origin }
+  const WAVE_STEP = 0.11;   // seconds for the wave to cross one link
+  const FLASH = 0.7;        // seconds a node stays lit
+  let wave = null;
+  let points = [];          // the last drawn positions, for finding the clicked node
+
   let size = 0;
   function resize() {
     const ratio = window.devicePixelRatio || 1;
@@ -223,37 +249,94 @@ function initNetSphere() {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
-  function draw(angle) {
+  // How lit a node is by the broadcast wave right now: 1 the moment the wave reaches it, fading to 0
+  function glowOf(i, now) {
+    if (!wave || wave.hops[i] < 0) return 0;
+    const since = now - wave.start - wave.hops[i] * WAVE_STEP;
+    return since < 0 || since > FLASH ? 0 : 1 - since / FLASH;
+  }
+
+  function draw(angle, now = performance.now() / 1000) {
     ctx.clearRect(0, 0, size, size);
     const half = size / 2;
     const radius = half * 0.86;
     const cosA = Math.cos(angle), sinA = Math.sin(angle);
     const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
     // Spin about the vertical axis, then tilt toward the viewer
-    const points = nodes.map((n) => {
+    points = nodes.map((n) => {
       const x = n.x * cosA + n.z * sinA;
       const z1 = -n.x * sinA + n.z * cosA;
       const y = n.y * cosT - z1 * sinT;
       const z = n.y * sinT + z1 * cosT;
       return { sx: half + x * radius, sy: half + y * radius, depth: (z + 1) / 2 };   // 0 back, 1 front
     });
+    const glow = points.map((_, i) => glowOf(i, now));
 
     const amber = document.documentElement.dataset.phosphor === 'amber';
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = amber ? '#ffb347' : '#4cc9f0';
+    const line = amber ? '#ffb347' : '#4cc9f0';
+    const dot = amber ? '#ffd59a' : '#9fe4ff';
+    const hot = amber ? '#fff1d6' : '#e6f9ff';   // lit by the wave, and packets
+
+    // Links, brightened where the wave is passing through
+    ctx.strokeStyle = line;
     for (const [a, b] of edges) {
       const p = points[a], q = points[b];
-      ctx.globalAlpha = 0.08 + 0.5 * ((p.depth + q.depth) / 2) ** 1.5;
+      const lit = Math.max(glow[a], glow[b]);
+      ctx.globalAlpha = Math.min(1, 0.08 + 0.5 * ((p.depth + q.depth) / 2) ** 1.5 + 0.6 * lit);
+      ctx.lineWidth = 1 + 0.6 * lit;
       ctx.beginPath();
       ctx.moveTo(p.sx, p.sy);
       ctx.lineTo(q.sx, q.sy);
       ctx.stroke();
     }
-    ctx.fillStyle = amber ? '#ffd59a' : '#9fe4ff';
-    for (const p of points) {
-      ctx.globalAlpha = 0.15 + 0.85 * p.depth ** 1.5;
+    ctx.lineWidth = 1;
+
+    // Nodes, swelling and turning white-hot as the wave reaches them
+    // (less swell on the smaller phone-sized sphere, so lit nodes don't run together)
+    const swell = 1.6 * Math.min(1, size / 90);
+    points.forEach((p, i) => {
+      ctx.fillStyle = glow[i] > 0.5 ? hot : dot;
+      ctx.globalAlpha = Math.min(1, 0.15 + 0.85 * p.depth ** 1.5 + glow[i]);
       ctx.beginPath();
-      ctx.arc(p.sx, p.sy, 0.8 + 1.4 * p.depth, 0, Math.PI * 2);
+      ctx.arc(p.sx, p.sy, 0.8 + 1.4 * p.depth + swell * glow[i], 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // A ring spreading out from the node that was clicked
+    if (wave) {
+      const age = (now - wave.start) / 0.6;
+      if (age < 1) {
+        const o = points[wave.origin];
+        ctx.strokeStyle = hot;
+        ctx.globalAlpha = 1 - age;
+        ctx.beginPath();
+        ctx.arc(o.sx, o.sy, 2 + age * radius * 0.45, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Packets: a bright dot partway along its link, with a short fading tail behind it
+    ctx.fillStyle = hot;
+    ctx.strokeStyle = hot;
+    for (const pk of packets) {
+      const p = points[pk.from], q = points[pk.to];
+      const at = (t) => ({ x: p.sx + (q.sx - p.sx) * t, y: p.sy + (q.sy - p.sy) * t });
+      const depth = p.depth + (q.depth - p.depth) * pk.t;
+      // Fade in on the first link and out on the last, so packets don't pop in and out
+      let fade = 1;
+      if (pk.first) fade = Math.min(fade, pk.t / 0.25);
+      if (pk.hops === 1) fade = Math.min(fade, (1 - pk.t) / 0.25);
+      const alpha = Math.max(0, fade) * (0.2 + 0.8 * depth ** 1.5);
+      const head = at(pk.t);
+      const tail = at(Math.max(0, pk.t - 0.18));
+      ctx.globalAlpha = alpha * 0.45;
+      ctx.beginPath();
+      ctx.moveTo(tail.x, tail.y);
+      ctx.lineTo(head.x, head.y);
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(head.x, head.y, 0.9 + 1.1 * depth, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -281,6 +364,52 @@ function initNetSphere() {
   canvas.addEventListener('pointerenter', () => { hovered = true; });
   canvas.addEventListener('pointerleave', () => { hovered = false; });
 
+  // Move each packet along its link; on arrival it hops on to another neighbour
+  // (never straight back) until it runs out of hops, and a new one takes its place
+  function movePackets(dt) {
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const pk = packets[i];
+      pk.t += dt / HOP_TIME;
+      if (pk.t < 1) continue;
+      pk.hops--;
+      if (pk.hops <= 0) {
+        packets.splice(i, 1);
+        continue;
+      }
+      const onward = neighbours[pk.to].filter((n) => n !== pk.from);
+      pk.from = pk.to;
+      pk.to = pick(onward.length ? onward : neighbours[pk.to]);
+      pk.t -= 1;
+      pk.first = false;
+    }
+    while (packets.length < PACKETS) launchPacket(0);
+  }
+
+  // Click: broadcast from the nearest node on the front of the sphere. A breadth-first
+  // search gives every node its hop count from there, which times the ripple outward.
+  canvas.addEventListener('click', (event) => {
+    const box = canvas.getBoundingClientRect();
+    const mx = event.clientX - box.left, my = event.clientY - box.top;
+    let origin = 0, best = Infinity;
+    points.forEach((p, i) => {
+      const d = (p.sx - mx) ** 2 + (p.sy - my) ** 2;
+      if (p.depth > 0.45 && d < best) { best = d; origin = i; }
+    });
+    const hops = nodes.map(() => -1);
+    hops[origin] = 0;
+    const queue = [origin];
+    while (queue.length) {
+      const current = queue.shift();
+      for (const next of neighbours[current]) {
+        if (hops[next] < 0) {
+          hops[next] = hops[current] + 1;
+          queue.push(next);
+        }
+      }
+    }
+    wave = { start: performance.now() / 1000, origin, hops };
+  });
+
   let running = false;
   let last = 0;
   function frame(time) {
@@ -289,9 +418,12 @@ function initNetSphere() {
       const dt = Math.min(0.05, (time - last) / 1000);
       speed += ((hovered ? FAST : CRUISE) - speed) * Math.min(1, dt * (hovered ? 3 : 1.2));
       angle += dt * speed;
+      movePackets(dt);
     }
     last = time;
-    draw(angle);
+    // Forget the wave once its last node has faded
+    if (wave && time / 1000 - wave.start > Math.max(...wave.hops) * WAVE_STEP + FLASH) wave = null;
+    draw(angle, time / 1000);
     requestAnimationFrame(frame);
   }
   new IntersectionObserver((entries) => {
@@ -329,6 +461,20 @@ function initScrollReveal() {
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 }
 
+// ---------- Résumé download ----------
+// The same file the kneeboard page in Contact links to. A temporary <a download> is clicked
+// so the browser saves the PDF under a friendly name instead of navigating to it.
+const RESUME_PDF = 'resume/Ashton-Lee-Resume.pdf';
+
+function downloadResume() {
+  const link = document.createElement('a');
+  link.href = RESUME_PDF;
+  link.download = 'Ashton-Lee-Resume.pdf';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 // ---------- Terminal commands ----------
 // Shared by the site's terminal and the access screen, so both answer the same way.
 // print(text, type) adds a line, append(node) adds an element, clear() empties the screen;
@@ -354,6 +500,7 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact, onG
       '  education   list education\n' +
       '  accolades   list awards and honors\n' +
       '  contact     show my email\n' +
+      '  resume      download my résumé (PDF)\n' +
       '  mobile      preview the site on phone screens\n' +
       '  play        play the arcade game, LUNAR DEFENSE\n' +
       '  scores      arcade high scores\n' +
@@ -363,7 +510,7 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact, onG
     ),
     whoami: () => print(
       'Ashton Lee: network administrator, IT specialist and programmer.\n' +
-      'Senior in Capella University\'s BS in Information Technology program.'
+      'Senior in Capella University\'s BS in Information Technology program (expected 2027).'
     ),
     skills: () => print('Skills:\n' + listFromPage('.skill-card h3')),
     experience: () => print('Experience:\n' + listFromPage('.mission-card h3')),
@@ -372,6 +519,10 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact, onG
     contact: () => {
       print('Email: ashton.redsky@gmail.com', 't-ok');
       if (onContact) onContact();
+    },
+    resume: () => {
+      downloadResume();
+      print('Transmitting crew record: Ashton-Lee-Resume.pdf (1 page).', 't-ok');
     },
     // Opens mobile.html (the site in phone-sized frames) in a new tab
     mobile: () => {
@@ -395,6 +546,8 @@ function terminalCommands({ print, append, clear, extraHelp = '', onContact, onG
   };
   commands.arcade = commands.play;
   commands.galaga = commands.play;
+  commands.download = commands.resume;
+  commands.cv = commands.resume;
   return Object.assign(hiddenCommands({ print, append }), commands);
 }
 

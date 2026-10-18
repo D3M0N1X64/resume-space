@@ -346,6 +346,11 @@ code {
   height: clamp(3.4rem, 8vw, 5.6rem);
 }
 
+/* Clicking it sends a broadcast across the network (main.js), so show it's clickable */
+@media (prefers-reduced-motion: no-preference) {
+  .net-sphere { cursor: pointer; }
+}
+
 @media print {
   .net-sphere { display: none; }
 }
@@ -962,6 +967,145 @@ code {
   padding: 2.2rem;
 }
 
+/* The contact card with the résumé page beside it (stacked on narrow screens) */
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.8rem 2.4rem;
+}
+
+.contact-row .contact-card { flex: 1 1 420px; }
+
+/* Once the page drops below the card, centre it */
+@media (max-width: 700px) {
+  .resume-page { margin: 0 auto; }
+}
+
+/* ----- Résumé download: a printed kneeboard page with a dog-eared corner ----- */
+/* The <a> casts the shadow and the inner sheet is clipped to the page shape: a clip-path
+   would cut a drop-shadow off too, so the two jobs live on different elements. */
+.resume-page {
+  --fold: 24px;
+  flex: none;
+  display: block;
+  width: 188px;
+  text-decoration: none;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+  transition: filter 0.2s;
+}
+
+.resume-page:hover,
+.resume-page:focus-visible {
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 1px var(--accent));
+}
+
+.resume-page:focus-visible { outline: none; }
+
+.page-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 8.5 / 11;   /* US letter */
+  padding: 1rem 1.05rem 1.05rem;
+  /* Off-white paper, a touch darker toward the bottom, with fine grain from the powder noise */
+  background:
+    var(--powder) 0 0 / 240px 240px,
+    linear-gradient(180deg, #f1efe8, #e2dfd6);
+  background-blend-mode: soft-light, normal;
+  color: #1c2533;
+  font-family: var(--font-mfd);
+  clip-path: polygon(0 0, calc(100% - var(--fold)) 0, 100% var(--fold), 100% 100%, 0 100%);
+}
+
+/* The folded-over corner: the back of the paper, a little darker, with a crease shadow */
+.page-sheet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--fold);
+  height: var(--fold);
+  background: linear-gradient(225deg, transparent 50%, #c4c0b5 50%, #d9d5cb 75%, #cfcbc1);
+  box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.18);
+}
+
+.page-head {
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5a6575;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(28, 37, 51, 0.25);
+  margin-right: calc(var(--fold) - 0.6rem);   /* clear of the fold */
+}
+
+.page-title {
+  margin-top: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.page-name {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: #4a5566;
+}
+
+/* Faint "text" lines of different lengths, so it reads as a printed page at a glance */
+.page-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0.9rem 0 auto;
+}
+
+.page-lines i {
+  display: block;
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(28, 37, 51, 0.16);
+}
+
+.page-lines i:nth-child(1) { width: 100%; }
+.page-lines i:nth-child(2) { width: 88%; }
+.page-lines i:nth-child(3) { width: 95%; }
+.page-lines i:nth-child(4) { width: 62%; }
+.page-lines i:nth-child(5) { width: 100%; }
+.page-lines i:nth-child(6) { width: 80%; }
+.page-lines i:nth-child(7) { width: 45%; }
+
+.page-meta {
+  margin-top: 0.8rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5a6575;
+}
+
+/* A stamped box along the bottom; it fills in on hover */
+.page-action {
+  margin-top: 0.45rem;
+  padding: 0.35rem 0.5rem;
+  border: 1.5px solid #0a5c8a;
+  border-radius: 2px;
+  color: #0a5c8a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.resume-page:hover .page-action,
+.resume-page:focus-visible .page-action {
+  background: #0a5c8a;
+  color: #f1efe8;
+}
+
 .contact-lead {
   color: var(--muted);
   margin: 0 0 0.6rem;
@@ -1081,7 +1225,9 @@ code {
   --lb-bottom: 34px;
   --lb-side: 88px;
   --chrome-y: calc(var(--bz-top) + var(--lb-top) + var(--lb-bottom) + var(--bz-bottom));
-  --bezel: #1f2125;
+  --bezel: #272a2f;     /* dark anodized aluminium */
+  --screen-radius: 8px; /* corners of the glass opening */
+  --chamfer: 7px;       /* the bevelled wall where the frame steps down to the glass */
   --phos: #6ad4ff;                       /* blue phosphor, matching the site's cyan */
   --phos-dim: rgba(106, 212, 255, 0.45);
   --phos-line: rgba(106, 212, 255, 0.22);
@@ -1090,6 +1236,8 @@ code {
   /* B612 was designed by Airbus for cockpit displays */
   /* Brushed-metal grain: noise stretched far sideways, so it reads as fine horizontal streaks */
   --brushed: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='60'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 1.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.7 0 0 0 0.15 0.7 0 0 0 0.15 0.7 0 0 0 0.15 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+  /* The same grain turned upright, for the side bars (each bar is brushed along its length) */
+  --brushed-v: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='600'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6 0.002' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.7 0 0 0 0.15 0.7 0 0 0 0.15 0.7 0 0 0 0.15 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
   --font-mfd: 'B612 Mono', var(--font-mono);
   --font-panel: 'B612', var(--font-display);
   /* Powder-coat grain: SVG noise lit from the top left, so the paint has a fine, bumpy sheen.
@@ -1111,7 +1259,7 @@ code {
   position: absolute;
   inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
   z-index: 3;
-  border-radius: 14px;
+  border-radius: var(--screen-radius);
   /* Reflections on the glass: a soft curved band along the top and a diagonal sheen */
   background:
     radial-gradient(120% 55% at 50% -12%, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 62%),
@@ -1120,9 +1268,29 @@ code {
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.75),
     inset 0 3px 12px rgba(0, 0, 0, 0.5),
-    0 0 0 2px #08090b,
-    0 0 0 3px #3a3d43,
     0 0 0 100vmax var(--bezel);
+}
+
+/* The chamfer: a bevelled wall stepping down from the frame to the recessed glass. Light comes
+   from above, so the top wall faces away from it and sits in shadow while the bottom wall faces
+   up and catches it. A ring cut out of a gradient (the mask keeps only the padding).
+   It hangs off .mfd-rim so it's drawn over the brushed grain, which runs right up to the glass. */
+.mfd-rim::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--bz-top) - var(--chamfer));
+  bottom: calc(var(--bz-bottom) - var(--chamfer));
+  left: calc(var(--bz-side) - var(--chamfer));
+  right: calc(var(--bz-side) - var(--chamfer));
+  padding: var(--chamfer);
+  border-radius: calc(var(--screen-radius) + var(--chamfer));
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 12%, rgba(0, 0, 0, 0) 88%, rgba(0, 0, 0, 0.25)),
+    linear-gradient(180deg, #060708 0%, #121417 18%, #24272c 60%, #4a4f57 96%, #6a7079 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
 }
 
 /* RESET: the screen goes dark before the access screen comes back */
@@ -1130,42 +1298,86 @@ code {
   background-color: #000;
 }
 
-/* The bezel's painted surface: powder-coat grain over the whole frame, with a hole cut
-   for the glass (the corners of that hole are hidden under the glass's rounded edge) */
+/* The bezel's brushed-metal surface, laid over the flat colour with soft-light blending.
+   Built like a machined frame: four bars mitred at the corners, each brushed along its length.
+   - ::before: the top and bottom bars, grain running sideways
+   - ::after: the side bars, grain running up and down
+   - .mfd-face itself blends them onto the frame, with a hole cut for the glass
+   Both bars carry the overall lighting (--light: bright at the top left, falling away to the
+   bottom right) and broad, soft bands of reflected light running ACROSS their grain: that
+   streaky sheen is what makes brushed metal read as metal rather than grey paint. */
 .mfd-face {
+  --in-x: var(--bz-side);   /* inner edges of the bars, at the glass */
+  --in-top: var(--bz-top);
+  --in-bottom: var(--bz-bottom);
+  --light:
+    radial-gradient(140% 110% at 0% 0%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(150deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.42) 100%);
   position: absolute;
   inset: 0;
   z-index: 3;
-  /* Brushed metal: fine horizontal grain (noise stretched sideways), a few longer scratches,
-     and a soft sheen across the top and bottom where the light catches the brushing */
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 7%,
-      rgba(255, 255, 255, 0) 93%, rgba(255, 255, 255, 0.14) 100%),
-    var(--brushed) 0 0 / 600px 40px,
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 2px, transparent 2px 3px),
-    var(--powder) 0 0 / 240px 240px;
   mix-blend-mode: soft-light;
-  opacity: 0.55;
+  opacity: 0.85;
   -webkit-mask:
     linear-gradient(#000 0 0),
-    linear-gradient(#000 0 0) var(--bz-side) var(--bz-top) / calc(100% - 2 * var(--bz-side)) calc(100% - var(--bz-top) - var(--bz-bottom)) no-repeat;
+    linear-gradient(#000 0 0) var(--in-x) var(--in-top) / calc(100% - 2 * var(--in-x)) calc(100% - var(--in-top) - var(--in-bottom)) no-repeat;
   -webkit-mask-composite: xor;
   mask:
     linear-gradient(#000 0 0),
-    linear-gradient(#000 0 0) var(--bz-side) var(--bz-top) / calc(100% - 2 * var(--bz-side)) calc(100% - var(--bz-top) - var(--bz-bottom)) no-repeat;
+    linear-gradient(#000 0 0) var(--in-x) var(--in-top) / calc(100% - 2 * var(--in-x)) calc(100% - var(--in-top) - var(--in-bottom)) no-repeat;
   mask-composite: exclude;
 }
 
-/* Light falling on the top of the bezel and its outer edge */
+.mfd-face::before,
+.mfd-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* Top and bottom bars. The polygon traces the top trapezoid, runs back down the left edge
+   and traces the bottom one; the diagonal sides are the mitres at the corners. */
+.mfd-face::before {
+  background:
+    var(--light),
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 6%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0) 33%,
+      rgba(255, 255, 255, 0) 57%, rgba(255, 255, 255, 0.13) 69%, rgba(255, 255, 255, 0) 82%),
+    var(--brushed) 0 0 / 600px 40px,
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 2px, transparent 2px 3px),
+    var(--powder) 0 0 / 240px 240px;
+  clip-path: polygon(
+    0 0, 100% 0, calc(100% - var(--in-x)) var(--in-top), var(--in-x) var(--in-top), 0 0,
+    0 100%, var(--in-x) calc(100% - var(--in-bottom)), calc(100% - var(--in-x)) calc(100% - var(--in-bottom)), 100% 100%, 0 100%);
+}
+
+/* Side bars: the same, turned upright */
+.mfd-face::after {
+  background:
+    var(--light),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 8%, rgba(255, 255, 255, 0.18) 26%, rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.11) 73%, rgba(255, 255, 255, 0) 86%),
+    var(--brushed-v) 0 0 / 40px 600px,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 2px, transparent 2px 3px),
+    var(--powder) 0 0 / 240px 240px;
+  clip-path: polygon(
+    0 0, var(--in-x) var(--in-top), var(--in-x) calc(100% - var(--in-bottom)), 0 100%, 0 0,
+    100% 0, 100% 100%, calc(100% - var(--in-x)) calc(100% - var(--in-bottom)), calc(100% - var(--in-x)) var(--in-top), 100% 0);
+}
+
+/* The frame's outer edge, bevelled: the top and left faces catch the light, the bottom and
+   right fall into shadow, and the surface darkens slightly as it rolls off toward the edge */
 .mfd-rim {
   position: absolute;
   inset: 0;
   z-index: 4;
   border-radius: inherit;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
-    inset 0 70px 90px -70px rgba(255, 255, 255, 0.06);
+    inset 0 0 0 1px rgba(0, 0, 0, 0.85),
+    inset 0 2px 0 1px rgba(255, 255, 255, 0.11),
+    inset 2px 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 -2px 0 1px rgba(0, 0, 0, 0.55),
+    inset -2px 0 0 1px rgba(0, 0, 0, 0.35),
+    inset 0 0 18px rgba(0, 0, 0, 0.45);
 }
 
 /* Dzus fasteners in the corners */
@@ -1487,7 +1699,7 @@ html.booting .mfd.entering .mfd-scroll {
   inset: var(--bz-top) var(--bz-side) var(--bz-bottom);
   z-index: 1;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: var(--screen-radius);
   background: radial-gradient(ellipse at center, #051421 0%, #030c16 60%, #01040a 100%);
   color: var(--phos);
   font-family: var(--font-mfd);
@@ -1687,11 +1899,11 @@ html.booting .mfd.entering .crt {
     --bz-side: 8px;
     --lb-top: 26px;
     --lb-bottom: 26px;
+    --screen-radius: 6px;
+    --chamfer: 4px;
   }
 
   .osb { width: 34px; height: 21px; }
-  .mfd-glass,
-  .crt { border-radius: 10px; }
   .mfd-screw { width: 8px; height: 8px; }
   .mfd-screw::after { top: 3px; }
   .mfd-labels { font-size: 9.5px; letter-spacing: 0.04em; }
@@ -1840,7 +2052,7 @@ html.tuned .crt {
   z-index: 2;
   display: none;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: var(--screen-radius);
 }
 
 .mfd.power-down .mfd-blackout,
@@ -1905,7 +2117,7 @@ html.tuned .crt {
   display: none;
   place-items: center;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: var(--screen-radius);
   background:
     linear-gradient(90deg, #000 0 12.5%, #1c1c1c 12.5% 25%, #383838 25% 37.5%, #555 37.5% 50%,
       #717171 50% 62.5%, #8e8e8e 62.5% 75%, #aaa 75% 87.5%, #c6c6c6 87.5%) bottom / 100% 26px no-repeat,
@@ -2125,12 +2337,27 @@ html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
   --panel-text: #9ea4ad;
 }
 
+/* Each key sits in a well cut into the frame: a dark pocket (--well), its top edge in shadow
+   and its bottom lip catching the light. The lip and shadow are the same ring nudged 1px
+   down or up, so only a sliver of each shows. */
+:root {
+  --well:
+    0 0 0 5px #121316,               /* the pocket */
+    0 -1px 0 5px #060708,            /* top inner wall, in shadow */
+    0 1px 0 5px #474c54;             /* bottom lip, lit from above */
+}
+
+/* Slimmer wells round the smaller phone keys (after the rule above, so it wins) */
+@media (max-width: 600px) {
+  :root { --well: 0 0 0 4px #121316, 0 -1px 0 4px #060708, 0 1px 0 4px #474c54; }
+}
+
 .osb {
   box-shadow:
     0 0 0 1px var(--panel-edge),     /* light through the gap round the key */
-    0 0 7px 2px var(--panel-halo),   /* spilling onto the bezel */
-    0 0 0 4px #27292d,
-    0 2px 0 4px #141518,
+    0 0 7px 2px var(--panel-halo),   /* spilling out of the well onto the bezel */
+    0 2px 2px 1px rgba(0, 0, 0, 0.55),   /* the key's shadow on the floor of the well */
+    var(--well),
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 -2px 3px rgba(0, 0, 0, 0.35);
   transition: box-shadow 0.15s;
@@ -2140,19 +2367,19 @@ html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
   box-shadow:
     0 0 0 1px var(--panel-hot),
     0 0 9px 3px var(--panel-halo),
-    0 0 0 4px #27292d,
-    0 2px 0 4px #141518,
+    0 2px 2px 1px rgba(0, 0, 0, 0.55),
+    var(--well),
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     inset 0 -2px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* A press flares the light as the key sinks */
+/* A press flares the light as the key sinks (its shadow tucks in under it) */
 .osb:active {
   box-shadow:
     0 0 0 1px var(--phos),
     0 0 12px 4px var(--panel-hot),
-    0 0 0 4px #27292d,
-    0 1px 0 4px #141518,
+    0 1px 1px rgba(0, 0, 0, 0.6),
+    var(--well),
     inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
@@ -2160,7 +2387,8 @@ html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
   box-shadow:
     0 0 0 1px var(--panel-edge),
     0 0 6px 2px var(--panel-halo),
-    0 0 0 3px #26282c,
+    0 2px 2px 1px rgba(0, 0, 0, 0.55),
+    var(--well),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -2179,7 +2407,7 @@ html[data-phosphor="amber"] .mfd-scroll span { background: #ffb347; }
   z-index: 2;
   display: none;
   overflow: hidden;
-  border-radius: 14px 14px 0 0;
+  border-radius: var(--screen-radius) var(--screen-radius) 0 0;
   background: radial-gradient(ellipse at center, #04111c 0%, #020a12 60%, #010307 100%);
   pointer-events: auto;
   touch-action: none;

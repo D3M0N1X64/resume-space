@@ -15,6 +15,7 @@ This site, and the commits co-authored by Claude, were built while attending the
 - Telemetry-style summary panel with a live UTC clock
 - Responsive layout for phones, and a print style that turns the page into a plain paper résumé
 - Small interactive terminal; its `mobile` command opens `mobile.html`, a preview of the site in phone-sized frames
+- Downloadable PDF résumé (`resume/`), from a kneeboard-page button beside the contact card or the terminal's `resume` command
 - Easter eggs (`js/eggs.js`), tracked by the `achievements` command. No spoilers here
 - LUNAR DEFENSE (`js/arcade.js`): a Galaga-style shooter in phosphor vectors, played on the display. Type `play` in a terminal. High scores with 3-letter initials are kept in your browser (`scores` lists them)
 
